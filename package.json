@@ -1,0 +1,56 @@
+{
+  "name": "@printcart/wix-integration",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite --port 3102",
+    "build": "vite build",
+    "build-watch": "vite build --watch",
+    "preview": "vite preview --port 4102"
+  },
+  "description": "Printcart Designer SDK for Wix.",
+  "author": "Printcart <dev@printcart.com> (printcart.com)",
+  "main": "./dist/main.js",
+  "module": "./dist/main.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/main.es.js",
+      "require": "./dist/main.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Printcart/wix-integration-sdk"
+  },
+  "keywords": [
+    "sdk",
+    "printing",
+    "printingAPI",
+    "api",
+    "product customizer",
+    "customizer",
+    "ecommerce",
+    "web2print",
+    "web-to-print",
+    "wix"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Printcart/wix-integration-sdk"
+  },
+  "homepage": "https://github.com/Printcart/wix-integration-sdk#readme",
+  "devDependencies": {
+    "msw": "^1.0.1",
+    "vite": "^2.9.9"
+  },
+  "dependencies": {
+    "@printcart/design-tool-sdk": "^1.6.0",
+    "@printcart/uploader-sdk": "^1.2.0"
+  },
+  "msw": {
+    "workerDirectory": "public"
+  }
+}

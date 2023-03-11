@@ -601,7 +601,6 @@ class PrintcartDesignerWix {
 
   #addStyle() {
     const sdkUrl = import.meta.env.VITE_SDK_URL ? import.meta.env.VITE_SDK_URL : "https://unpkg.com/@printcart/shopify-integration/dist";
-    // const sdkUrl = "https://unpkg.com/@printcart/shopify-integration/dist";
 
     const link = document.createElement("link");
 

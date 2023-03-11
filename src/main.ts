@@ -66,8 +66,6 @@ class PrintcartDesignerWix {
     const self = this;
 
     window.wixDevelopersAnalytics.register(import.meta.env.APP_ID, function report(eventName, data) {
-      if (eventName === "ViewContent" && data?.variants && data.variants.length > 1) {
-      }
       switch (eventName) {
         case "ViewContent":
           if (localStorage.getItem("pc-product")) {

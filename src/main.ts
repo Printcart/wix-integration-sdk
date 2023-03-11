@@ -35,7 +35,6 @@ class PrintcartDesignerWix {
   token: string | null;
   productIdPrintcart: string | null;
   productIdWix: string | null;
-  // productVariantIdWix: string | null; // TODO:
   orderIdWix: string | null;
   orderNumberWix: string | null;
   options?: IOptions;
@@ -48,12 +47,13 @@ class PrintcartDesignerWix {
     this.token = this.#getUnauthToken();
     this.productIdPrintcart = null;
     this.productIdWix = null;
-    // this.productVariantIdWix = null; // TODO:
+    this.orderIdWix = null;
+    this.orderNumberWix = null;
 
     // @ts-ignore
     // this.options = window.PrintcartDesignerShopifyOptions;
 
-    this.#apiUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : "https://api.printcart.com/v1/integration/shopify/products";
+    this.#apiUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : "https://api.printcart.com/v1";
 
     this.#designerUrl = import.meta.env.VITE_CUSTOMIZER_URL ? import.meta.env.VITE_CUSTOMIZER_URL : "https://customizer.printcart.com";
 
@@ -67,11 +67,106 @@ class PrintcartDesignerWix {
 
     window.wixDevelopersAnalytics.register(import.meta.env.APP_ID, function report(eventName, data) {
       switch (eventName) {
+        case "ViewContent":
+          if (localStorage.getItem("pc-product")) {
+            localStorage.removeItem("pc-product");
+          }
+
+          if (data.variants && data.variants.length > 1) {
+            localStorage.setItem("pc-product", "variants");
+          } else {
+            localStorage.setItem("pc-product", "simple");
+          }
+
+          break;
         case "productPageLoaded":
+          if (localStorage.getItem("pc-product") != "simple") {
+            return;
+          }
+
           self.productIdWix = data?.productId;
 
           if (!self.productIdWix) {
             throw new Error("Can not find product ID WIX");
+          }
+
+          self.#getPrintcartProduct().then((res) => {
+            self.productIdPrintcart = res?.data?.id;
+
+            if (!self.productIdPrintcart) {
+              throw new Error("Can not find product ID Printcart");
+            }
+
+            self.#addStyle();
+            self.#createBtn();
+            self.#openSelectModal();
+            self.#registerCloseModal();
+            self.#modalTrap();
+
+            const btn = document.querySelector("button#pc-btn");
+
+            const isDesignEnabled = res.data.enable_design;
+            const isUploadEnabled = res.data.enable_upload;
+
+            if (isDesignEnabled) {
+              self.#designerInstance = new PrintcartDesigner({
+                token: self.token,
+                productId: self.productIdPrintcart,
+                options: {
+                  ...self.options?.designerOptions,
+                  designerUrl: self.#designerUrl,
+                },
+              });
+
+              self.#registerDesignerEvents();
+
+              if (btn && btn instanceof HTMLButtonElement) {
+                btn.disabled = false;
+              }
+            }
+
+            if (isUploadEnabled) {
+              self.#uploaderInstance = new PrintcartUploader({
+                token: self.token,
+                productId: self.productIdPrintcart,
+              });
+
+              self.#registerUploaderEvents();
+
+              if (btn && btn instanceof HTMLButtonElement) {
+                btn.disabled = false;
+              }
+            }
+
+            const handleClick = () => {
+              if (self.#designerInstance && !self.#uploaderInstance) {
+                self.#designerInstance.render();
+              }
+
+              if (!self.#designerInstance && self.#uploaderInstance) {
+                self.#uploaderInstance.open();
+              }
+
+              if (self.#designerInstance && self.#uploaderInstance) {
+                self.#openModal();
+              }
+            };
+
+            if (btn && btn instanceof HTMLButtonElement) {
+              btn.onclick = handleClick;
+            }
+          });
+
+          break;
+        case "CustomizeProduct":
+          if (localStorage.getItem("pc-product") != "variants") {
+            return;
+          }
+
+          self.productIdWix = data?.variantId;
+
+          if (!self.productIdWix) {
+            throw new Error("Can not find product variant ID WIX");
           }
 
           self.#getPrintcartProduct().then((res) => {
@@ -142,26 +237,24 @@ class PrintcartDesignerWix {
           });
 
           break;
-        // case "CustomizeProduct": // TODO:
-        //   self.productVariantIdWix = data?.variantId;
-        //   break;
         case "Purchase":
-          console.log("Purchase", data);
-
-          if (localStorage.getItem("pc-design-ids")) {
-            const designIds = localStorage.getItem("pc-design-ids");
-            self.orderIdWix = data?.orderId;
-            self.orderNumberWix = data?.id;
-
-            if (!self.orderIdWix || !self.orderNumberWix) {
-              throw new Error("Can not find order ID WIX or order number WIX");
-            }
-
-            if (designIds) {
-              console.log(JSON.parse(designIds));
-              self.#createProjectPrintcart(JSON.parse(designIds));
-            }
+          if (!localStorage.getItem("pc-design-ids")) {
+            return;
           }
+
+          const designIds = localStorage.getItem("pc-design-ids");
+          self.orderIdWix = data?.orderId;
+          self.orderNumberWix = data?.id;
+
+          if (!self.orderIdWix || !self.orderNumberWix) {
+            throw new Error("Can not find order ID WIX or order number WIX");
+          }
+
+          if (!designIds) {
+            throw new Error("Can not find design Ids");
+          }
+
+          self.#createProjectPrintcart(self.orderNumberWix, self.orderIdWix, JSON.parse(designIds));
 
           break;
       }
@@ -520,7 +613,7 @@ class PrintcartDesignerWix {
 
   async #getPrintcartProduct() {
     try {
-      const printcartApiUrl = `${this.#apiUrl}/${this.productIdWix}`;
+      const printcartApiUrl = `${this.#apiUrl}/integration/wix/products/${this.productIdWix}`;
 
       const token = this.token;
 
@@ -567,13 +660,11 @@ class PrintcartDesignerWix {
     wrap.appendChild(button);
 
     cartForm.appendChild(wrap);
-    // cartForm?.parentNode.insertBefore(wrap, cartForm);
   }
 
-  // TODO:
-  async #createProjectPrintcart(_designIds: []) {
+  async #createProjectPrintcart(_orderNumber: string, _orderId: string, _designIds: []) {
     try {
-      const createProjectApiUrl = "http://localhost:8001/v1/projects";
+      const createProjectApiUrl = `${this.#apiUrl}/projects`;
 
       const token = this.token;
 
@@ -581,13 +672,22 @@ class PrintcartDesignerWix {
         throw new Error("Missing Printcart Unauth Token");
       }
 
+      const dataProject = {
+        name: `${_orderNumber}`,
+        status: "processing",
+        design_ids: _designIds,
+        order_detail: {
+          id: _orderId,
+        },
+      };
+
       await fetch(createProjectApiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-PrintCart-Unauth-Token": token,
         },
-        body: JSON.stringify(_designIds),
+        body: JSON.stringify(dataProject),
       });
     } catch (error) {
       //@ts-ignore

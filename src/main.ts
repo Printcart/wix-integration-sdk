@@ -80,7 +80,7 @@ class PrintcartDesignerWix {
 
           break;
         case "productPageLoaded":
-          if (localStorage.getItem("pc-product") != "simple") {
+          if (localStorage.getItem("pc-product") !== "simple") {
             return;
           }
 
@@ -159,7 +159,7 @@ class PrintcartDesignerWix {
 
           break;
         case "CustomizeProduct":
-          if (localStorage.getItem("pc-product") != "variants") {
+          if (localStorage.getItem("pc-product") !== "variants") {
             return;
           }
 

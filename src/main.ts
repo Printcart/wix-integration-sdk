@@ -51,7 +51,7 @@ class PrintcartDesignerWix {
     this.orderNumberWix = null;
 
     // @ts-ignore
-    // this.options = window.PrintcartDesignerShopifyOptions;
+    this.options = window.PrintcartDesignerShopifyOptions;
 
     this.#apiUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : "https://api.printcart.com/v1";
 

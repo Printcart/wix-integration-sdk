@@ -51,7 +51,7 @@ class PrintcartDesignerWix {
     this.orderNumberWix = null;
 
     // @ts-ignore
-    this.options = window.PrintcartDesignerShopifyOptions;
+    // this.options = window.PrintcartDesignerShopifyOptions;
 
     this.#apiUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : "https://api.printcart.com/v1";
 
@@ -600,8 +600,8 @@ class PrintcartDesignerWix {
   }
 
   #addStyle() {
-    // const sdkUrl = import.meta.env.VITE_SDK_URL ? import.meta.env.VITE_SDK_URL : "https://unpkg.com/@printcart/shopify-integration/dist";
-    const sdkUrl = "https://unpkg.com/@printcart/shopify-integration/dist";
+    const sdkUrl = import.meta.env.VITE_SDK_URL ? import.meta.env.VITE_SDK_URL : "https://unpkg.com/@printcart/shopify-integration/dist";
+    // const sdkUrl = "https://unpkg.com/@printcart/shopify-integration/dist";
 
     const link = document.createElement("link");
 

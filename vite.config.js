@@ -11,7 +11,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(_dirname, "src/main.ts"),
-      name: "PrintcartWix",
+      name: "PrintcartDesignerWix",
       fileName: (format) => {
         if (format === "umd") {
           return "main.js";

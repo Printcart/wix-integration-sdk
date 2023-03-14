@@ -51,6 +51,7 @@ class PrintcartDesignerWix {
     this.productIdWix = _productIdWix;
     this.orderIdWix = _orderIdWix;
     this.orderNumberWix = _orderNumberWix;
+    this.#productForm = null;
 
     // @ts-ignore
     this.options = window.PrintcartDesignerShopifyOptions;

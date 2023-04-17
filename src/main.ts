@@ -88,13 +88,10 @@ class PrintcartDesignerWix {
         }
 
         this.#addStyle();
+        this.#createBtn();
         this.#openSelectModal();
         this.#registerCloseModal();
         this.#modalTrap();
-
-        if (!document.querySelector("div[id='pc-designer_wrap']")) {
-          this.#createBtn();
-        }
 
         const btn = document.querySelector("button#pc-btn");
 
@@ -565,6 +562,10 @@ class PrintcartDesignerWix {
       return;
     }
 
+    if (document.getElementById("pc-designer_wrap") !== null) {
+      return;
+    }
+
     const wrap = document.createElement("div");
     wrap.id = "pc-designer_wrap";
 
@@ -575,20 +576,6 @@ class PrintcartDesignerWix {
     button.innerHTML = this.options?.designBtnText ? this.options.designBtnText : "Start Design";
     button.style.marginTop = "1.8rem";
     button.disabled = true;
-
-    button.onclick = () => {
-      if (this.#designerInstance && !this.#uploaderInstance) {
-        this.#designerInstance.render();
-      }
-
-      if (!this.#designerInstance && this.#uploaderInstance) {
-        this.#uploaderInstance.open();
-      }
-
-      if (this.#designerInstance && this.#uploaderInstance) {
-        this.#openModal();
-      }
-    };
 
     wrap.appendChild(button);
 

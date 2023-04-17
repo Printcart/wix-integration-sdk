@@ -44,7 +44,12 @@ class PrintcartDesignerWix {
   #uploaderInstance: any;
   #productForm: HTMLFormElement | null;
 
-  constructor(_eventName: string | null, _productIdWix: string | null, _orderIdWix: string | null, _orderNumberWix: string | null) {
+  constructor(
+    _eventName: string | null,
+    _productIdWix: string | null,
+    _orderIdWix: string | null,
+    _orderNumberWix: string | null
+  ) {
     this.token = this.#getUnauthToken();
     this.eventName = _eventName;
     this.productIdPrintcart = null;
@@ -56,9 +61,13 @@ class PrintcartDesignerWix {
     // @ts-ignore
     this.options = window.PrintcartDesignerShopifyOptions;
 
-    this.#apiUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : "https://api.printcart.com/v1";
+    this.#apiUrl = import.meta.env.VITE_API_URL
+      ? import.meta.env.VITE_API_URL
+      : "https://api.printcart.com/v1";
 
-    this.#designerUrl = import.meta.env.VITE_CUSTOMIZER_URL ? import.meta.env.VITE_CUSTOMIZER_URL : "https://customizer.printcart.com";
+    this.#designerUrl = import.meta.env.VITE_CUSTOMIZER_URL
+      ? import.meta.env.VITE_CUSTOMIZER_URL
+      : "https://customizer.printcart.com";
 
     if (this.eventName === "productPageLoaded" || this.eventName === "CustomizeProduct") {
       this.#productForm = document.querySelector("[data-hook='product-options']");
@@ -79,10 +88,13 @@ class PrintcartDesignerWix {
         }
 
         this.#addStyle();
-        this.#createBtn();
         this.#openSelectModal();
         this.#registerCloseModal();
         this.#modalTrap();
+
+        if (!document.querySelector("div[id='pc-designer_wrap']")) {
+          this.#createBtn();
+        }
 
         const btn = document.querySelector("button#pc-btn");
 
@@ -327,7 +339,9 @@ class PrintcartDesignerWix {
 
       const btn = document.createElement("button");
       btn.className = "pc-btn pc-danger-btn";
-      btn.innerHTML = this.options?.removeUploaderBtnText ? this.options.removeUploaderBtnText : "Remove";
+      btn.innerHTML = this.options?.removeUploaderBtnText
+        ? this.options.removeUploaderBtnText
+        : "Remove";
       btn.onclick = () => {
         const newIds = input.value.split(",").filter((id) => id !== design.data.id);
 
@@ -495,13 +509,17 @@ class PrintcartDesignerWix {
   #getScriptSrc() {
     const isDev = import.meta.env.MODE === "development";
 
-    const src = isDev ? import.meta.url : (document.querySelector("[id='pc-wix-integration-sdk']") as HTMLScriptElement).src;
+    const src = isDev
+      ? import.meta.url
+      : (document.querySelector("[id='pc-wix-integration-sdk']") as HTMLScriptElement).src;
 
     return src;
   }
 
   #addStyle() {
-    const sdkUrl = import.meta.env.VITE_SDK_URL ? import.meta.env.VITE_SDK_URL : "https://unpkg.com/@printcart/shopify-integration/dist";
+    const sdkUrl = import.meta.env.VITE_SDK_URL
+      ? import.meta.env.VITE_SDK_URL
+      : "https://unpkg.com/@printcart/shopify-integration/dist";
 
     const link = document.createElement("link");
 
@@ -552,10 +570,25 @@ class PrintcartDesignerWix {
 
     const button = document.createElement("button");
     button.id = "pc-btn";
-    button.className = "button CoreButtonNext3690398815__root Focusable4066241217__root Button3176414074__root StatesButton3612784068__root _36nLbs";
+    button.className =
+      "button CoreButtonNext3690398815__root Focusable4066241217__root Button3176414074__root StatesButton3612784068__root _36nLbs";
     button.innerHTML = this.options?.designBtnText ? this.options.designBtnText : "Start Design";
     button.style.marginTop = "1.8rem";
     button.disabled = true;
+
+    button.onclick = () => {
+      if (this.#designerInstance && !this.#uploaderInstance) {
+        this.#designerInstance.render();
+      }
+
+      if (!this.#designerInstance && this.#uploaderInstance) {
+        this.#uploaderInstance.open();
+      }
+
+      if (this.#designerInstance && this.#uploaderInstance) {
+        this.#openModal();
+      }
+    };
 
     wrap.appendChild(button);
 

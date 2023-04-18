@@ -14,7 +14,7 @@ Add CSS file to header:
 Add JS file before the closing body tag:
 
 ```html
-<script src="https://unpkg.com/@printcart/shopify-integration/dist/main.js"></script>
+<script src="https://unpkg.com/@printcart/wix-integration/dist/main.js"></script>
 ```
 
 ## Options
@@ -29,7 +29,7 @@ window.PrintcartDesignerShopifyOptions = {
   onEditSuccess: (data, context) => {},
 };
 
-<script src="https://unpkg.com/@printcart/shopify-integration/dist/main.js"></script>;
+<script src="https://unpkg.com/@printcart/wix-integration/dist/main.js"></script>;
 ```
 
 ### `designBtnText`
@@ -66,7 +66,7 @@ window.PrintcartDesignerShopifyOptions = {
   onEditSuccess: (data) => console.log(data),
 };
 
-<script src="https://unpkg.com/@printcart/shopify-integration-sdk/dist/main.js"></script>;
+<script src="https://unpkg.com/@printcart/wix-integration-sdk/dist/main.js"></script>;
 ```
 
 <a href="https://printcart.com">

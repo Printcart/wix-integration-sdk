@@ -341,6 +341,12 @@ class PrintcartDesignerWix {
 
     previewWrap.className = "pc-preview-wrap";
 
+    if (localStorage.getItem("pc-design-ids")) {
+      localStorage.removeItem("pc-design-ids");
+    }
+
+    localStorage.setItem("pc-design-ids", JSON.stringify(ids));
+
     data.forEach((design) => {
       if (!design.data.design_image.url) return;
 

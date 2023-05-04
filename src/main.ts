@@ -177,38 +177,50 @@ class PrintcartDesignerWix {
 
     const inner = `
       <button aria-label="Close" id="pc-select_close-btn"><span data-modal-x></span></button>
-      <div id="pc-select_header">Choose a way to design this product</div>
-      <div id="pc-select_container">
-        <button class="pc-select_btn" id="pc-select_btn_upload">
-          <div aria-hidden="true" class="pc-select_btn_wrap">
-            <div class="pc-select_btn_img">
-              <img src="${uploadImgSrc}" alt="Printcart Uploader" />
-            </div>
-            <div class="pc-select_btn_content">
-              <h2>Upload a full design</h2>
-              <ul>
-                <li>Have a complete design</li>
-                <li>Have your own designer</li>
-              </ul>
-            </div>
+      <div class="pc-select-wrap" id="pc-content-overlay">
+        <div class="pc-select-inner">
+          <div id="pc-select_header">Choose a way to design this product</div>
+          <div id="pc-select_container">
+            <button class="pc-select_btn" id="pc-select_btn_upload">
+              <div aria-hidden="true" class="pc-select_btn_wrap">
+                <div class="pc-select_btn_img">
+                  <div class="pc-select_btn_img_inner">
+                    <img src="${uploadImgSrc}" alt="Printcart Uploader" />
+                  </div>
+                </div>
+                <div class="pc-select_btn_content">
+                  <div class="pc-select_btn_content_inner">
+                    <h2 class="pc-title">Upload a full design</h2>
+                    <ul>
+                      <li>Have a complete design</li>
+                      <li>Have your own designer</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="visually-hidden">Upload Design file</div>
+            </button>
+            <button class="pc-select_btn" id="pc-select_btn_design">
+              <div aria-hidden="true" class="pc-select_btn_wrap">
+                <div class="pc-select_btn_img">
+                  <div class="pc-select_btn_img_inner">
+                    <img src="${designImgSrc}" alt="Printcart Designer" />
+                  </div>
+                </div>
+                <div class="pc-select_btn_content">
+                  <div class="pc-select_btn_content_inner">
+                    <h2 class="pc-title">Design here online</h2>
+                    <ul>
+                      <li>Already have your concept</li>
+                      <li>Customize every details</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="visually-hidden">Upload Design file</div>
+            </button>
           </div>
-          <div class="visually-hidden">Upload Design file</div>
-        </button>
-        <button class="pc-select_btn" id="pc-select_btn_design">
-          <div aria-hidden="true" class="pc-select_btn_wrap">
-            <div class="pc-select_btn_img">
-              <img src="${designImgSrc}" alt="Printcart Designer" />
-            </div>
-            <div class="pc-select_btn_content">
-              <h2>Design here online</h2>
-              <ul>
-                <li>Already have your concept</li>
-                <li>Customize every details</li>
-              </ul>
-            </div>
-          </div>
-          <div class="visually-hidden">Upload Design file</div>
-        </button>
+        </div>
       </div>
     `;
 
@@ -267,6 +279,7 @@ class PrintcartDesignerWix {
 
   #registerCloseModal() {
     const closeModalBtn = document.getElementById("pc-select_close-btn");
+    const backdropCloseModal = document.getElementById("pc-content-overlay");
 
     const handleClose = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -276,6 +289,7 @@ class PrintcartDesignerWix {
 
     window.addEventListener("keydown", handleClose);
     closeModalBtn?.addEventListener("click", () => this.#closeModal());
+    backdropCloseModal?.addEventListener("click", () => this.#closeModal());
   }
 
   #modalTrap() {
@@ -516,7 +530,7 @@ class PrintcartDesignerWix {
   #addStyle() {
     const sdkUrl = import.meta.env.VITE_SDK_URL
       ? import.meta.env.VITE_SDK_URL
-      : "https://unpkg.com/@printcart/shopify-integration/dist";
+      : "https://unpkg.com/@printcart/wix-integration/dist";
 
     const link = document.createElement("link");
 

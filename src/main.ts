@@ -8,6 +8,7 @@ import "./main.css";
 interface IOptions {
   buttonId?: string;
   designBtnText?: string;
+  designClassName?: string;
   editBtnText?: string;
   removeUploaderBtnText?: string;
   onUploadSuccess?: (data: [DataWrap] | [Data], ctx: any) => void;
@@ -591,10 +592,8 @@ class PrintcartDesignerWix {
 
     const button = document.createElement("button");
     button.id = "pc-btn";
-    button.className =
-      "button CoreButtonNext3690398815__root Focusable4066241217__root Button3176414074__root StatesButton3612784068__root _36nLbs";
+    button.className = this.options?.designClassName ? this.options?.designClassName : "";
     button.innerHTML = this.options?.designBtnText ? this.options.designBtnText : "Start Design";
-    button.style.marginTop = "1.8rem";
     button.disabled = true;
 
     wrap.appendChild(button);

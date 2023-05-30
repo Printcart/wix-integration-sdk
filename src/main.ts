@@ -4,7 +4,6 @@ import PrintcartDesigner from "@printcart/design-tool-sdk";
 import PrintcartUploader from "@printcart/uploader-sdk";
 import "./main.css";
 
-// TODO: on error events
 interface IOptions {
   buttonId?: string;
   designBtnText?: string;
@@ -34,9 +33,7 @@ type Data = {
 class PrintcartDesignerWix {
   #apiUrl: string;
   token: string | null;
-  eventName: string | null;
-  productIdPrintcart: string | null;
-  productIdWix: string | null;
+  productIdPC: string | null;
   orderIdWix: string | null;
   orderNumberWix: string | null;
   options?: IOptions;
@@ -44,19 +41,13 @@ class PrintcartDesignerWix {
   #designerInstance: any;
   #uploaderInstance: any;
   #productForm: HTMLFormElement | null;
+  registerListener: any;
 
-  constructor(
-    _eventName: string | null,
-    _productIdWix: string | null,
-    _orderIdWix: string | null,
-    _orderNumberWix: string | null
-  ) {
+  constructor() {
     this.token = this.#getUnauthToken();
-    this.eventName = _eventName;
-    this.productIdPrintcart = null;
-    this.productIdWix = _productIdWix;
-    this.orderIdWix = _orderIdWix;
-    this.orderNumberWix = _orderNumberWix;
+    this.productIdPC = null;
+    this.orderIdWix = null;
+    this.orderNumberWix = null;
     this.#productForm = null;
 
     // @ts-ignore
@@ -70,106 +61,155 @@ class PrintcartDesignerWix {
       ? import.meta.env.VITE_CUSTOMIZER_URL
       : "https://customizer.printcart.com";
 
-    if (this.eventName === "productPageLoaded" || this.eventName === "CustomizeProduct") {
-      this.#productForm = document.querySelector("[data-hook='product-options']");
+    this.registerListener = this.#registerListener.bind(this);
+    window.addEventListener(
+      "wixDevelopersAnalyticsReady",
+      this.registerListener
+    );
+  }
 
-      if (!this.#productForm) {
-        throw new Error("This script can only be used inside a Wix Product Page.");
+  #registerListener() {
+    const self = this;
+    window?.wixDevelopersAnalytics.register(
+      import.meta.env.APP_ID,
+      function report(eventName: any, data: any) {
+        console.log(eventName);
+        switch (eventName) {
+          case "ViewContent":
+            if (localStorage.getItem("pc-product")) {
+              localStorage.removeItem("pc-product");
+            }
+
+            break;
+          case "productPageLoaded":
+            console.log(data);
+            if (data.variants && data.variants.length > 1) {
+              return;
+            }
+
+            self.#initializeProductTools(data?.productId);
+
+            break;
+          case "CustomizeProduct":
+            if (data.variants && data.variants.length < 1) {
+              return;
+            }
+
+            self.#initializeProductTools(data?.variantId);
+
+            break;
+          case "Purchase":
+            if (!localStorage.getItem("pc-design-ids")) {
+              return;
+            }
+
+            const designIds = localStorage.getItem("pc-design-ids");
+            self.orderIdWix = data?.orderId;
+            self.orderNumberWix = data?.id;
+
+            if (!self.orderIdWix) {
+              throw new Error("Can not find order ID WIX");
+            }
+
+            if (!self.orderNumberWix) {
+              throw new Error("Can not find order number WIX");
+            }
+
+            if (!designIds) {
+              throw new Error("Can not find design Ids");
+            }
+
+            self.#createProjectPrintcart(
+              self.orderNumberWix,
+              self.orderIdWix,
+              JSON.parse(designIds)
+            );
+
+            break;
+        }
+      }
+    );
+  }
+
+  #initializeProductTools(productIdWix: string | null) {
+    this.#productForm = document.querySelector("[data-hook='product-options']");
+
+    if (!this.#productForm) {
+      throw new Error(
+        "This script can only be used inside a Wix Product Page."
+      );
+    }
+
+    if (!productIdWix) {
+      throw new Error("Can not find product ID WIX");
+    }
+
+    this.#getPrintcartProduct(productIdWix).then((res) => {
+      this.productIdPC = res?.data?.id;
+
+      if (!this.productIdPC) {
+        throw new Error("Can not find product ID Printcart");
       }
 
-      if (!this.productIdWix) {
-        throw new Error("Can not find product ID WIX");
-      }
+      this.#addStyle();
+      this.#createBtn();
+      this.#openSelectModal();
+      this.#registerCloseModal();
+      this.#modalTrap();
 
-      this.#getPrintcartProduct().then((res) => {
-        this.productIdPrintcart = res?.data?.id;
+      const btn = document.querySelector("button#pc-btn");
 
-        if (!this.productIdPrintcart) {
-          throw new Error("Can not find product ID Printcart");
-        }
+      const isDesignEnabled = res.data.enable_design;
+      const isUploadEnabled = res.data.enable_upload;
 
-        this.#addStyle();
-        this.#createBtn();
-        this.#openSelectModal();
-        this.#registerCloseModal();
-        this.#modalTrap();
+      if (isDesignEnabled) {
+        this.#designerInstance = new PrintcartDesigner({
+          token: this.token,
+          productId: this.productIdPC,
+          options: {
+            ...this.options?.designerOptions,
+            designerUrl: this.#designerUrl,
+          },
+        });
 
-        const btn = document.querySelector("button#pc-btn");
-
-        const isDesignEnabled = res.data.enable_design;
-        const isUploadEnabled = res.data.enable_upload;
-
-        if (isDesignEnabled) {
-          this.#designerInstance = new PrintcartDesigner({
-            token: this.token,
-            productId: this.productIdPrintcart,
-            options: {
-              ...this.options?.designerOptions,
-              designerUrl: this.#designerUrl,
-            },
-          });
-
-          this.#registerDesignerEvents();
-
-          if (btn && btn instanceof HTMLButtonElement) {
-            btn.disabled = false;
-          }
-        }
-
-        if (isUploadEnabled) {
-          this.#uploaderInstance = new PrintcartUploader({
-            token: this.token,
-            productId: this.productIdPrintcart,
-          });
-
-          this.#registerUploaderEvents();
-
-          if (btn && btn instanceof HTMLButtonElement) {
-            btn.disabled = false;
-          }
-        }
-
-        const handleClick = () => {
-          if (this.#designerInstance && !this.#uploaderInstance) {
-            this.#designerInstance.render();
-          }
-
-          if (!this.#designerInstance && this.#uploaderInstance) {
-            this.#uploaderInstance.open();
-          }
-
-          if (this.#designerInstance && this.#uploaderInstance) {
-            this.#openModal();
-          }
-        };
+        this.#registerDesignerEvents();
 
         if (btn && btn instanceof HTMLButtonElement) {
-          btn.onclick = handleClick;
+          btn.disabled = false;
         }
-      });
-    }
-
-    if (this.eventName === "Purchase") {
-      if (!localStorage.getItem("pc-design-ids")) {
-        return;
       }
 
-      const designIds = localStorage.getItem("pc-design-ids");
+      if (isUploadEnabled) {
+        this.#uploaderInstance = new PrintcartUploader({
+          token: this.token,
+          productId: this.productIdPC,
+        });
 
-      if (!this.orderIdWix) {
-        throw new Error("Can not find order ID WIX");
+        this.#registerUploaderEvents();
+
+        if (btn && btn instanceof HTMLButtonElement) {
+          btn.disabled = false;
+        }
       }
 
-      if (!this.orderNumberWix) {
-        throw new Error("Can not find order number WIX");
-      }
+      const handleClick = () => {
+        if (this.#designerInstance && !this.#uploaderInstance) {
+          this.#designerInstance.render();
+        }
 
-      if (!designIds) {
-        throw new Error("Can not find design Ids");
-      }
+        if (!this.#designerInstance && this.#uploaderInstance) {
+          this.#uploaderInstance.open();
+        }
 
-      this.#createProjectPrintcart(this.orderNumberWix, this.orderIdWix, JSON.parse(designIds));
-    }
+        if (this.#designerInstance && this.#uploaderInstance) {
+          this.#openModal();
+        }
+      };
+
+      if (btn && btn instanceof HTMLButtonElement) {
+        btn.onclick = handleClick;
+      }
+    });
   }
 
   #openSelectModal() {
@@ -299,7 +339,8 @@ class PrintcartDesignerWix {
     const focusableEls = modal?.querySelectorAll("button");
 
     const firstFocusableEl = focusableEls && focusableEls[0];
-    const lastFocusableEl = focusableEls && focusableEls[focusableEls.length - 1];
+    const lastFocusableEl =
+      focusableEls && focusableEls[focusableEls.length - 1];
 
     const handleModalTrap = (e: KeyboardEvent) => {
       if (e.key === "Tab") {
@@ -323,7 +364,9 @@ class PrintcartDesignerWix {
   #handleUploadSuccess(data: [DataWrap]) {
     const ids = data.map((design) => design.data.id);
 
-    let input = <HTMLInputElement>document.querySelector('input[name="properties[_pcDesignIds]"]');
+    let input = <HTMLInputElement>(
+      document.querySelector('input[name="properties[_pcDesignIds]"]')
+    );
 
     if (input) {
       input.value += `,${ids.join()}`;
@@ -338,7 +381,9 @@ class PrintcartDesignerWix {
     }
 
     // Show design image list on product page
-    const previewWrap = document.querySelector(".pc-preview-wrap") || document.createElement("div");
+    const previewWrap =
+      document.querySelector(".pc-preview-wrap") ||
+      document.createElement("div");
 
     previewWrap.className = "pc-preview-wrap";
 
@@ -361,7 +406,9 @@ class PrintcartDesignerWix {
         ? this.options.removeUploaderBtnText
         : "Remove";
       btn.onclick = () => {
-        const newIds = input.value.split(",").filter((id) => id !== design.data.id);
+        const newIds = input.value
+          .split(",")
+          .filter((id) => id !== design.data.id);
 
         input.value = newIds.join();
 
@@ -402,7 +449,9 @@ class PrintcartDesignerWix {
     const self = this;
     const ids = data.map((design) => design.id);
 
-    let input = <HTMLInputElement>document.querySelector('input[name="properties[_pcDesignIds]"]');
+    let input = <HTMLInputElement>(
+      document.querySelector('input[name="properties[_pcDesignIds]"]')
+    );
 
     if (input) {
       input.value += `,${ids.join()}`;
@@ -416,7 +465,9 @@ class PrintcartDesignerWix {
       this.#productForm?.appendChild(input);
     }
 
-    const previewWrap = document.querySelector(".pc-preview-wrap") || document.createElement("div");
+    const previewWrap =
+      document.querySelector(".pc-preview-wrap") ||
+      document.createElement("div");
 
     previewWrap.className = "pc-preview-wrap";
 
@@ -495,7 +546,9 @@ class PrintcartDesignerWix {
       this.#designerInstance.on("edit-success", (data: Data) => {
         if (!data.design_image.url) return;
 
-        const img = document.querySelector(`[data-pc-design-id="${data.id}"] img`);
+        const img = document.querySelector(
+          `[data-pc-design-id="${data.id}"] img`
+        );
 
         if (!img || !(img instanceof HTMLImageElement)) {
           throw new Error("Can't find image element");
@@ -529,7 +582,11 @@ class PrintcartDesignerWix {
 
     const src = isDev
       ? import.meta.url
-      : (document.querySelector("[id='pc-wix-integration-sdk']") as HTMLScriptElement).src;
+      : (
+          document.querySelector(
+            "[id='pc-wix-integration-sdk']"
+          ) as HTMLScriptElement
+        ).src;
 
     return src;
   }
@@ -547,9 +604,11 @@ class PrintcartDesignerWix {
     document.head.appendChild(link);
   }
 
-  async #getPrintcartProduct() {
+  async #getPrintcartProduct(productIdWix: string) {
     try {
-      const printcartApiUrl = `${this.#apiUrl}/integration/wix/products/${this.productIdWix}`;
+      const printcartApiUrl = `${
+        this.#apiUrl
+      }/integration/wix/products/${productIdWix}`;
 
       const token = this.token;
 
@@ -568,7 +627,10 @@ class PrintcartDesignerWix {
       return product;
     } catch (error) {
       //@ts-ignore
-      console.error("There has been a problem with your fetch operation:", error);
+      console.error(
+        "There has been a problem with your fetch operation:",
+        error
+      );
 
       return;
     }
@@ -592,8 +654,12 @@ class PrintcartDesignerWix {
 
     const button = document.createElement("button");
     button.id = "pc-btn";
-    button.className = this.options?.designClassName ? this.options?.designClassName : "";
-    button.innerHTML = this.options?.designBtnText ? this.options.designBtnText : "Start Design";
+    button.className = this.options?.designClassName
+      ? this.options?.designClassName
+      : "";
+    button.innerHTML = this.options?.designBtnText
+      ? this.options.designBtnText
+      : "Start Design";
     button.disabled = true;
 
     wrap.appendChild(button);
@@ -601,7 +667,11 @@ class PrintcartDesignerWix {
     cartForm.appendChild(wrap);
   }
 
-  async #createProjectPrintcart(_orderNumber: string, _orderId: string, _designIds: []) {
+  async #createProjectPrintcart(
+    _orderNumber: string,
+    _orderId: string,
+    _designIds: []
+  ) {
     try {
       const createProjectApiUrl = `${this.#apiUrl}/projects`;
 
@@ -630,24 +700,23 @@ class PrintcartDesignerWix {
       });
     } catch (error) {
       //@ts-ignore
-      console.error("There has been a problem with your fetch operation:", error);
+      console.error(
+        "There has been a problem with your fetch operation:",
+        error
+      );
 
       return;
     }
   }
 }
 
-export default PrintcartDesignerWix;
+const prepare = async () => {
+  if (import.meta.env.DEV) {
+    // const { worker } = require("./mocks/browser");
+    //@ts-ignore
+    const { worker } = await import("../mocks/browser");
+    worker.start();
+  }
+};
 
-// const prepare = async () => {
-//   if (import.meta.env.DEV) {
-//     // const { worker } = require("./mocks/browser");
-//     //@ts-ignore
-//     const { worker } = await import("../mocks/browser");
-//     worker.start();
-//   }
-// };
-
-// prepare().then(() => new PrintcartDesignerWix());
-
-// new PrintcartDesignerWix();
+prepare().then(() => new PrintcartDesignerWix());

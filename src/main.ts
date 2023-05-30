@@ -73,7 +73,6 @@ class PrintcartDesignerWix {
     window?.wixDevelopersAnalytics.register(
       import.meta.env.APP_ID,
       function report(eventName: any, data: any) {
-        console.log(eventName);
         switch (eventName) {
           case "ViewContent":
             if (localStorage.getItem("pc-product")) {
@@ -82,7 +81,6 @@ class PrintcartDesignerWix {
 
             break;
           case "productPageLoaded":
-            console.log(data);
             if (data.variants && data.variants.length > 1) {
               return;
             }

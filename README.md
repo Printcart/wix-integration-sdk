@@ -6,7 +6,7 @@ Add CSS file to header:
 
 ```html
 <link
-  href="https://unpkg.com/@printcart/shopify-integration/dist/style.css"
+  href="https://unpkg.com/@printcart/wix-integration/dist/style.css"
   rel="stylesheet"
 />
 ```

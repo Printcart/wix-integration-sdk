@@ -366,3 +366,29 @@
     margin-top: 10px;
   }
 }
+
+@media only screen and (max-width: 600px) {
+  .pc-select_btn {
+    width: 80%;
+  }
+
+  #pc-select_header {
+    padding-bottom: 0.15rem !important;
+    font-size: 22pt !important;
+  }
+
+  #pc-select_close-btn {
+    top: 20px !important;
+  }
+
+  .pc-select_btn_content_inner ul {
+    padding-left: 2px;
+    margin-top: 10px;
+    font-size: 0.85rem;
+  }
+
+  .pc-select_btn_content_inner .pc-title {
+    font-size: 1.3rem;
+    margin-bottom: 0.15em;
+  }
+}

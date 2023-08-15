@@ -369,12 +369,12 @@
 
 @media only screen and (max-width: 600px) {
   .pc-select_btn {
-    width: 80%;
+    width: 85%;
   }
 
   #pc-select_header {
-    padding-bottom: 0.15rem !important;
-    font-size: 22pt !important;
+    padding-bottom: 1rem !important;
+    font-size: 25pt !important;
   }
 
   #pc-select_close-btn {
@@ -384,11 +384,15 @@
   .pc-select_btn_content_inner ul {
     padding-left: 2px;
     margin-top: 10px;
-    font-size: 0.85rem;
+    font-size: 0.72rem;
+  }
+
+  .pc-select_btn_content_inner ul li {
+    margin-left: 20px;
   }
 
   .pc-select_btn_content_inner .pc-title {
-    font-size: 1.3rem;
+    font-size: 1.05rem;
     margin-bottom: 0.15em;
   }
 }

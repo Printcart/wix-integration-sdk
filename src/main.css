@@ -146,7 +146,7 @@
 
 .pc-select_btn_content_inner ul {
   margin: 12px 0 0 0;
-  list-style-type: none;
+  list-style-type: "\2713";
   text-align: start;
 }
 
@@ -158,7 +158,6 @@
 }
 
 .pc-select_btn_content_inner li::marker {
-  content: "\2713";
   color: var(--pc-green-color);
 }
 
@@ -368,31 +367,66 @@
 }
 
 @media only screen and (max-width: 600px) {
-  .pc-select_btn {
-    width: 85%;
+
+  /* CSS for other than iOS devices */
+  @supports not (-webkit-touch-callout: none) {
+    .pc-select_btn {
+      width: 85%;
+    }
+
+    #pc-select_header {
+      padding-bottom: 1rem !important;
+      font-size: 25pt !important;
+    }
+
+    #pc-select_close-btn {
+      top: 20px !important;
+    }
+
+    .pc-select_btn_content_inner ul {
+      padding-left: 2px;
+      margin-top: 10px;
+      font-size: 0.72rem;
+    }
+
+    .pc-select_btn_content_inner ul li {
+      margin-left: 20px;
+    }
+
+    .pc-select_btn_content_inner .pc-title {
+      font-size: 1.05rem;
+      margin-bottom: 0.15em;
+    }
   }
 
-  #pc-select_header {
-    padding-bottom: 1rem !important;
-    font-size: 25pt !important;
-  }
+  /* CSS specific to iOS devices */
+  @supports (-webkit-touch-callout: none) {
+    @media only screen and (max-width: 600px) {
+      #pc-select_wrap .pc-select-inner {
+        top: 50%;
+      }
 
-  #pc-select_close-btn {
-    top: 20px !important;
-  }
+      .pc-select_btn {
+        width: 85.5%;
+      }
 
-  .pc-select_btn_content_inner ul {
-    padding-left: 2px;
-    margin-top: 10px;
-    font-size: 0.72rem;
-  }
+      #pc-select_header {
+        padding-bottom: 0.8rem !important;
+        font-size: 25pt !important;
+      }
 
-  .pc-select_btn_content_inner ul li {
-    margin-left: 20px;
-  }
+      .pc-select_btn_content_inner .pc-title {
+        font-size: 1.1rem;
+      }
 
-  .pc-select_btn_content_inner .pc-title {
-    font-size: 1.05rem;
-    margin-bottom: 0.15em;
+      .pc-select_btn_content_inner ul {
+        padding-left: 0px;
+        font-size: 11.5px !important;
+      }
+
+      .pc-select_btn_content_inner ul li {
+        margin-left: 15px;
+      }
+    }
   }
 }

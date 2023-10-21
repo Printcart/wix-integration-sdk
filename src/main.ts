@@ -33,6 +33,7 @@ type Data = {
 class PrintcartDesignerWix {
   #apiUrl: string;
   token: string | null;
+  appID: string;
   productIdPC: string | null;
   orderIdWix: string | null;
   orderNumberWix: string | null;
@@ -46,6 +47,7 @@ class PrintcartDesignerWix {
   constructor() {
     this.token = this.#getUnauthToken();
     this.productIdPC = null;
+    this.appID = "325c68a5-64c2-440d-b093-8cea369df06b";
     this.orderIdWix = null;
     this.orderNumberWix = null;
     this.#productForm = null;
@@ -61,17 +63,30 @@ class PrintcartDesignerWix {
       ? import.meta.env.VITE_CUSTOMIZER_URL
       : "https://customizer.printcart.com";
 
-    this.registerListener = this.#registerListener.bind(this);
-    window.addEventListener(
-      "wixDevelopersAnalyticsReady",
-      this.registerListener
-    );
+    // this.registerListener = this.#registerListener.bind(this);
+    // window.addEventListener(
+    //   "wixDevelopersAnalyticsReady",
+    //   this.registerListener
+    // );
   }
 
-  #registerListener() {
+  init() {
+    const wd = window as any;
     const self = this;
+    wd?.wixDevelopersAnalytics
+      ? this.#registerListener("first")
+      : wd.addEventListener("wixDevelopersAnalyticsReady", function () {
+          self.#registerListener("second");
+        });
+  }
+
+  #registerListener(par: string) {
+    const self = this;
+    // Log to check
+    console.log("Printcart start App " + par);
+
     window?.wixDevelopersAnalytics.register(
-      import.meta.env.APP_ID,
+      this.appID,
       function report(eventName: any, data: any) {
         switch (eventName) {
           case "ViewContent":
@@ -81,6 +96,8 @@ class PrintcartDesignerWix {
 
             break;
           case "productPageLoaded":
+            // Log to check
+            console.log("Printcart: productPageLoaded", data);
             if (data.variants && data.variants.length > 1) {
               return;
             }
@@ -708,13 +725,14 @@ class PrintcartDesignerWix {
   }
 }
 
-const prepare = async () => {
-  if (import.meta.env.DEV) {
-    // const { worker } = require("./mocks/browser");
-    //@ts-ignore
-    const { worker } = await import("../mocks/browser");
-    worker.start();
-  }
-};
+// const prepare = async () => {
+//   if (import.meta.env.DEV) {
+//     const { worker } = await require("./mocks/browser");
+//     //@ts-ignore
+//     // const { worker } = await import("../mocks/browser");
+//     worker.start();
+//   }
+// };
 
-prepare().then(() => new PrintcartDesignerWix());
+const printcartDesignerWix = new PrintcartDesignerWix();
+printcartDesignerWix.init();

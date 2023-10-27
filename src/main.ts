@@ -1,4 +1,4 @@
-import PrintcartDesigner from "./printcart-designer.js";
+import PrintcartDesigner from "./printcartDesigner";
 import "./main.css";
 
 const printcartDesigner = new PrintcartDesigner();

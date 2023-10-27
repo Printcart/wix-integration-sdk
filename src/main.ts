@@ -1,6 +1,4 @@
-//@ts-ignore
 import PrintcartDesigner from "@printcart/design-tool-sdk";
-//@ts-ignore
 import PrintcartUploader from "@printcart/uploader-sdk";
 import "./main.css";
 
@@ -62,12 +60,6 @@ class PrintcartDesignerWix {
     this.#designerUrl = import.meta.env.VITE_CUSTOMIZER_URL
       ? import.meta.env.VITE_CUSTOMIZER_URL
       : "https://customizer.printcart.com";
-
-    // this.registerListener = this.#registerListener.bind(this);
-    // window.addEventListener(
-    //   "wixDevelopersAnalyticsReady",
-    //   this.registerListener
-    // );
   }
 
   init() {
@@ -231,54 +223,7 @@ class PrintcartDesignerWix {
     const uploadImgSrc = "https://files.printcart.com/common/upload.svg";
     const designImgSrc = "https://files.printcart.com/common/design.svg";
 
-    const inner = `
-      <button aria-label="Close" id="pc-select_close-btn"><span data-modal-x></span></button>
-      <div class="pc-select-wrap" id="pc-content-overlay">
-        <div class="pc-select-inner">
-          <div id="pc-select_header">Choose a way to design this product</div>
-          <div id="pc-select_container">
-            <button class="pc-select_btn" id="pc-select_btn_upload">
-              <div aria-hidden="true" class="pc-select_btn_wrap">
-                <div class="pc-select_btn_img">
-                  <div class="pc-select_btn_img_inner">
-                    <img src="${uploadImgSrc}" alt="Printcart Uploader" />
-                  </div>
-                </div>
-                <div class="pc-select_btn_content">
-                  <div class="pc-select_btn_content_inner">
-                    <h2 class="pc-title">Upload a full design</h2>
-                    <ul>
-                      <li>Have a complete design</li>
-                      <li>Have your own designer</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              <div class="visually-hidden">Upload Design file</div>
-            </button>
-            <button class="pc-select_btn" id="pc-select_btn_design">
-              <div aria-hidden="true" class="pc-select_btn_wrap">
-                <div class="pc-select_btn_img">
-                  <div class="pc-select_btn_img_inner">
-                    <img src="${designImgSrc}" alt="Printcart Designer" />
-                  </div>
-                </div>
-                <div class="pc-select_btn_content">
-                  <div class="pc-select_btn_content_inner">
-                    <h2 class="pc-title">Design here online</h2>
-                    <ul>
-                      <li>Already have your concept</li>
-                      <li>Customize every details</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              <div class="visually-hidden">Upload Design file</div>
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
+    const inner = `<button aria-label="Close" id="pc-select_close-btn"><span data-modal-x></span></button><div class="pc-select-wrap" id="pc-content-overlay"><div class="pc-select-inner"><div id="pc-select_header">Choose a way to design this product</div><div id="pc-select_container"><button class="pc-select_btn" id="pc-select_btn_upload"><div aria-hidden="true" class="pc-select_btn_wrap"><div class="pc-select_btn_img"><div class="pc-select_btn_img_inner"><img src="${uploadImgSrc}" alt="Printcart Uploader"></div></div><div class="pc-select_btn_content"><div class="pc-select_btn_content_inner"><h2 class="pc-title">Upload a full design</h2><ul><li>Have a complete design</li><li>Have your own designer</li></ul></div></div></div><div class="visually-hidden">Upload Design file</div></button><button class="pc-select_btn" id="pc-select_btn_design"><div aria-hidden="true" class="pc-select_btn_wrap"><div class="pc-select_btn_img"><div class="pc-select_btn_img_inner"><img src="${designImgSrc}" alt="Printcart Designer"></div></div><div class="pc-select_btn_content"><div class="pc-select_btn_content_inner"><h2 class="pc-title">Design here online</h2><ul><li>Already have your concept</li><li>Customize every details</li></ul></div></div></div><div class="visually-hidden">Upload Design file</div></button></div></div></div>`;
 
     const wrap = document.createElement("div");
     wrap.id = "pc-select_wrap";
@@ -292,16 +237,16 @@ class PrintcartDesignerWix {
     const design = () => {
       if (this.#designerInstance) {
         this.#closeModal();
-
         this.#designerInstance.render();
+        document.body.classList.add("pc-overflow");
       }
     };
 
     const upload = () => {
       if (this.#uploaderInstance) {
         this.#closeModal();
-
         this.#uploaderInstance.open();
+        document.body.classList.add("pc-overflow");
       }
     };
 
@@ -317,7 +262,7 @@ class PrintcartDesignerWix {
 
     if (modal) {
       modal.style.display = "flex";
-      document.body.classList.toggle("pc-overflow");
+      document.body.classList.add("pc-overflow");
     }
 
     const closeBtn = modal?.querySelector("#pc-select_close-btn");
@@ -329,8 +274,9 @@ class PrintcartDesignerWix {
 
     if (modal) {
       modal.style.display = "none";
-      document.body.classList.toggle("pc-overflow");
     }
+
+    document.body.classList.remove("pc-overflow");
   }
 
   #registerCloseModal() {
@@ -345,7 +291,12 @@ class PrintcartDesignerWix {
 
     window.addEventListener("keydown", handleClose);
     closeModalBtn?.addEventListener("click", () => this.#closeModal());
-    backdropCloseModal?.addEventListener("click", () => this.#closeModal());
+    backdropCloseModal?.addEventListener("click", () => {
+      const iframeWrap = document.getElementById("pc-designer-iframe-wrapper");
+      if (iframeWrap?.style.visibility !== "visible") {
+        this.#closeModal();
+      }
+    });
   }
 
   #modalTrap() {
@@ -548,6 +499,9 @@ class PrintcartDesignerWix {
         this.#handleUploadSuccess(data);
         this.#uploaderInstance.close();
       });
+      this.#uploaderInstance.on("close", () => {
+        document.body.classList.remove("pc-overflow");
+      });
     }
   }
 
@@ -556,6 +510,10 @@ class PrintcartDesignerWix {
       this.#designerInstance.on("upload-success", (data: [Data]) => {
         this.#handleDesignSuccess(data);
         this.#designerInstance.close();
+      });
+
+      this.#designerInstance.on("closed", () => {
+        document.body.classList.remove("pc-overflow");
       });
 
       this.#designerInstance.on("edit-success", (data: Data) => {

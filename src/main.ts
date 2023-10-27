@@ -1,6 +1,7 @@
-import PrintcartDesigner from "@printcart/design-tool-sdk";
-import PrintcartUploader from "@printcart/uploader-sdk";
+import PrintcartDesigner from "./printcart-designer.js";
 import "./main.css";
+
+const printcartDesigner = new PrintcartDesigner();
 
 interface IOptions {
   buttonId?: string;
@@ -170,7 +171,7 @@ class PrintcartDesignerWix {
       const isUploadEnabled = res.data.enable_upload;
 
       if (isDesignEnabled) {
-        this.#designerInstance = new PrintcartDesigner({
+        this.#designerInstance = printcartDesigner.initDesignTool({
           token: this.token,
           productId: this.productIdPC,
           options: {
@@ -187,7 +188,7 @@ class PrintcartDesignerWix {
       }
 
       if (isUploadEnabled) {
-        this.#uploaderInstance = new PrintcartUploader({
+        this.#uploaderInstance = printcartDesigner.initUploader({
           token: this.token,
           productId: this.productIdPC,
         });

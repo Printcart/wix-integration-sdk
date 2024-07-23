@@ -1,6 +1,8 @@
 import PrintcartDesigner from "./printcartDesigner";
 import "./main.css";
 
+(function() {
+
 const printcartDesigner = new PrintcartDesigner();
 
 interface IOptions {
@@ -86,7 +88,6 @@ class PrintcartDesignerWix {
             if (localStorage.getItem("pc-product")) {
               localStorage.removeItem("pc-product");
             }
-
             break;
           case "productPageLoaded":
             // Log to check
@@ -94,45 +95,35 @@ class PrintcartDesignerWix {
             if (data.variants && data.variants.length > 1) {
               return;
             }
-
             self.#initializeProductTools(data?.productId);
-
             break;
           case "CustomizeProduct":
             if (data.variants && data.variants.length < 1) {
               return;
             }
-
             self.#initializeProductTools(data?.variantId);
-
             break;
           case "Purchase":
             if (!localStorage.getItem("pc-design-ids")) {
               return;
             }
-
             const designIds = localStorage.getItem("pc-design-ids");
             self.orderIdWix = data?.orderId;
             self.orderNumberWix = data?.id;
-
             if (!self.orderIdWix) {
               throw new Error("Can not find order ID WIX");
             }
-
             if (!self.orderNumberWix) {
               throw new Error("Can not find order number WIX");
             }
-
             if (!designIds) {
               throw new Error("Can not find design Ids");
             }
-
             self.#createProjectPrintcart(
               self.orderNumberWix,
               self.orderIdWix,
               JSON.parse(designIds)
             );
-
             break;
         }
       }
@@ -330,6 +321,7 @@ class PrintcartDesignerWix {
 
   #handleUploadSuccess(data: [DataWrap]) {
     const ids = data.map((design) => design.data.id);
+    console.log("Id: ", ids);
 
     let input = <HTMLInputElement>(
       document.querySelector('input[name="properties[_pcDesignIds]"]')
@@ -378,6 +370,7 @@ class PrintcartDesignerWix {
           .filter((id) => id !== design.data.id);
 
         input.value = newIds.join();
+        console.log("data1: ", newIds);
 
         preview.remove();
       };
@@ -443,6 +436,7 @@ class PrintcartDesignerWix {
     }
 
     localStorage.setItem("pc-design-ids", JSON.stringify(ids));
+    console.log("id: ", JSON.stringify(ids));
 
     data.forEach((design) => {
       if (!design.design_image.url) return;
@@ -539,39 +533,44 @@ class PrintcartDesignerWix {
     }
   }
 
+
   #getUnauthToken() {
+    const isDev = import.meta.env.MODE === "development";
+    console.log("IsDev: ", JSON.stringify(isDev));
     const src = this.#getScriptSrc();
 
     const url = new URL(src);
 
     const params = new URLSearchParams(url.search);
 
-    const token = params.get("shopT");
+    const token = "0ba4d853d3f19432c52d74bb0d29d0e7d9eadb607b511528bf8384ae218839d4";
 
     return token;
   }
 
+  // #getScriptSrc() {
+  //   const isDev = import.meta.env.MODE === "development";
+  //   console.log("Isdev: ", JSON.stringify(isDev));
+  //   const src = isDev
+  //     ? import.meta.url
+  //     : (
+  //         document.querySelector(
+  //           "[id='pc-wix-integration-sdk']"
+  //         ) as HTMLScriptElement
+  //       ).src;
+  //   console.log("Src: ", JSON.stringify(src));
+  //   return src;
+  // }
+
   #getScriptSrc() {
-    const isDev = import.meta.env.MODE === "development";
-
-    const src = isDev
-      ? import.meta.url
-      : (
-          document.querySelector(
-            "[id='pc-wix-integration-sdk']"
-          ) as HTMLScriptElement
-        ).src;
-
-    return src;
+    return 'https://589f-27-72-31-253.ngrok-free.app/dist/main.js?shopT=0ba4d853d3f19432c52d74bb0d29d0e7d9eadb607b511528bf8384ae218839d4';
   }
 
   #addStyle() {
     const sdkUrl = import.meta.env.VITE_SDK_URL
       ? import.meta.env.VITE_SDK_URL
       : "https://unpkg.com/@printcart/wix-integration/dist";
-
     const link = document.createElement("link");
-
     link.rel = "stylesheet";
     link.href = `${sdkUrl}/style.css`;
 
@@ -585,6 +584,7 @@ class PrintcartDesignerWix {
       }/integration/wix/products/${productIdWix}`;
 
       const token = this.token;
+      console.log("Token: ", token);
 
       if (!token) {
         throw new Error("Missing Printcart Unauth Token");
@@ -650,7 +650,6 @@ class PrintcartDesignerWix {
       const createProjectApiUrl = `${this.#apiUrl}/projects`;
 
       const token = this.token;
-
       if (!token) {
         throw new Error("Missing Printcart Unauth Token");
       }
@@ -684,14 +683,6 @@ class PrintcartDesignerWix {
   }
 }
 
-// const prepare = async () => {
-//   if (import.meta.env.DEV) {
-//     const { worker } = await require("./mocks/browser");
-//     //@ts-ignore
-//     // const { worker } = await import("../mocks/browser");
-//     worker.start();
-//   }
-// };
-
 const printcartDesignerWix = new PrintcartDesignerWix();
 printcartDesignerWix.init();
+})();

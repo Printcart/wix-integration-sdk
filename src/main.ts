@@ -1,65 +1,64 @@
 (function() {
-
-  const PrintcartDesigner = ( () => {
+  const PrintcartDesigner = (function () {
     "use strict";
     var He = Object.defineProperty;
-    var ze = (L: { [x: string]: any; }, p: PropertyKey, v: any) =>
+    var ze = (L, p, v) =>
       p in L
         ? He(L, p, { enumerable: !0, configurable: !0, writable: !0, value: v })
         : (L[p] = v);
-    var te = (L: this, p: string, v) => (ze(L, typeof p != "symbol" ? p + "" : p, v), v);
+    var te = (L, p, v) => (ze(L, typeof p != "symbol" ? p + "" : p, v), v);
     var L = Object.defineProperty,
-      p = (t: { [x: string]: any; }, e: PropertyKey, n: any) =>
+      p = (t, e, n) =>
         e in t
           ? L(t, e, { enumerable: !0, configurable: !0, writable: !0, value: n })
           : (t[e] = n),
-      v = (t: this, e: string, n: undefined) => (p(t, typeof e != "symbol" ? e + "" : e, n), n),
-      H = (t: any, e: { has: (arg0: any) => any; }, n: string) => {
+      v = (t, e, n) => (p(t, typeof e != "symbol" ? e + "" : e, n), n),
+      H = (t, e, n) => {
         if (!e.has(t)) throw TypeError("Cannot " + n);
       },
-      R = (t: this, e: { get: (arg0: any) => any; }, n: { call: (arg0: any) => any; } | undefined) => (
+      R = (t, e, n) => (
         H(t, e, "read from private field"), n ? n.call(t) : e.get(t)
       ),
-      w = (t: WeakKey, e: { has: (arg0: any) => any; add: (arg0: any) => any; set: (arg0: any, arg1: any) => any; }, n: undefined) => {
+      w = (t, e, n) => {
         if (e.has(t))
           throw TypeError("Cannot add the same private member more than once");
         e instanceof WeakSet ? e.add(t) : e.set(t, n);
       },
-      ne = (t: this, e: { set: (arg0: any, arg1: any) => any; }, n: any, r: { call: (arg0: any, arg1: any) => any; } | undefined) => (
+      ne = (t, e, n, r) => (
         H(t, e, "write to private field"), r ? r.call(t, n) : e.set(t, n), n
       ),
-      l = (t: this, e: any, n: any) => (H(t, e, "access private method"), n),
-      E: WeakMap<WeakKey, any>,
-      P: WeakMap<WeakKey, any>,
-      z: WeakSet<WeakKey>,
-      re: () => void,
-      G: WeakSet<WeakKey>,
-      ie: () => void,
-      U: WeakSet<WeakKey>,
-      V: () => URL,
-      d: WeakSet<WeakKey>,
-      m: (t: any, ...e: any[]) => void,
+      l = (t, e, n) => (H(t, e, "access private method"), n),
+      E,
+      P,
+      z,
+      re,
+      G,
+      ie,
+      U,
+      V,
+      d,
+      m,
       Z = { exports: {} },
       b = typeof Reflect == "object" ? Reflect : null,
       se =
         b && typeof b.apply == "function"
           ? b.apply
-          : function (e: Function, n: any, r: any) {
+          : function (e, n, r) {
               return Function.prototype.apply.call(e, n, r);
             },
-      F: ((target: object) => (string | symbol)[]) | ((arg0: any) => any);
+      F;
     b && typeof b.ownKeys == "function"
       ? (F = b.ownKeys)
       : Object.getOwnPropertySymbols
-      ? (F = function (e: any) {
+      ? (F = function (e) {
           return Object.getOwnPropertyNames(e).concat(
             Object.getOwnPropertySymbols(e)
           );
         })
-      : (F = function (e: any) {
+      : (F = function (e) {
           return Object.getOwnPropertyNames(e);
         });
-    function xe(t: Error) {
+    function xe(t) {
       console && console.warn && console.warn(t);
     }
     var oe =
@@ -67,7 +66,7 @@
       function (e) {
         return e !== e;
       };
-    function a(this: any) {
+    function a() {
       a.init.call(this);
     }
     (Z.exports = a),
@@ -77,7 +76,7 @@
       (a.prototype._eventsCount = 0),
       (a.prototype._maxListeners = void 0);
     var ae = 10;
-    function S(t: any) {
+    function S(t) {
       if (typeof t != "function")
         throw new TypeError(
           'The "listener" argument must be of type Function. Received type ' +
@@ -105,7 +104,7 @@
           ((this._events = Object.create(null)), (this._eventsCount = 0)),
           (this._maxListeners = this._maxListeners || void 0);
       }),
-      (a.prototype.setMaxListeners = function (e: unknown) {
+      (a.prototype.setMaxListeners = function (e) {
         if (typeof e != "number" || e < 0 || oe(e))
           throw new RangeError(
             'The value of "n" is out of range. It must be a non-negative number. Received ' +
@@ -114,13 +113,13 @@
           );
         return (this._maxListeners = e), this;
       });
-    function fe(t: { _maxListeners: undefined; }) {
+    function fe(t) {
       return t._maxListeners === void 0 ? a.defaultMaxListeners : t._maxListeners;
     }
     (a.prototype.getMaxListeners = function () {
       return fe(this);
     }),
-      (a.prototype.emit = function (e: string) {
+      (a.prototype.emit = function (e) {
         for (var n = [], r = 1; r < arguments.length; r++) n.push(arguments[r]);
         var i = e === "error",
           o = this._events;
@@ -142,7 +141,7 @@
             se(ee[r], this, n);
         return !0;
       });
-    function ce(t: { _events: any; _eventsCount: number; emit: (arg0: string, arg1: any, arg2: any) => any; }, e: string | number, n: { listener: any; }, r: boolean) {
+    function ce(t, e, n, r) {
       var i, o, s;
       if (
         (S(n),
@@ -181,14 +180,14 @@
       }
       return t;
     }
-    (a.prototype.addListener = function (e: any, n: any) {
+    (a.prototype.addListener = function (e, n) {
       return ce(this, e, n, !1);
     }),
       (a.prototype.on = a.prototype.addListener),
-      (a.prototype.prependListener = function (e: any, n: any) {
+      (a.prototype.prependListener = function (e, n) {
         return ce(this, e, n, !0);
       });
-    function Me(this: any) {
+    function Me() {
       if (!this.fired)
         return (
           this.target.removeListener(this.type, this.wrapFn),
@@ -198,18 +197,18 @@
             : this.listener.apply(this.target, arguments)
         );
     }
-    function ue(t: any, e: any, n: any) {
+    function ue(t, e, n) {
       var r = { fired: !1, wrapFn: void 0, target: t, type: e, listener: n },
         i = Me.bind(r);
       return (i.listener = n), (r.wrapFn = i), i;
     }
-    (a.prototype.once = function (e: any, n: any) {
+    (a.prototype.once = function (e, n) {
       return S(n), this.on(e, ue(this, e, n)), this;
     }),
-      (a.prototype.prependOnceListener = function (e: any, n: any) {
+      (a.prototype.prependOnceListener = function (e, n) {
         return S(n), this.prependListener(e, ue(this, e, n)), this;
       }),
-      (a.prototype.removeListener = function (e: string | number, n: any) {
+      (a.prototype.removeListener = function (e, n) {
         var r, i, o, s, c;
         if ((S(n), (i = this._events), i === void 0)) return this;
         if (((r = i[e]), r === void 0)) return this;
@@ -233,7 +232,7 @@
         return this;
       }),
       (a.prototype.off = a.prototype.removeListener),
-      (a.prototype.removeAllListeners = function (e: string | number) {
+      (a.prototype.removeAllListeners = function (e) {
         var n, r, i;
         if (((r = this._events), r === void 0)) return this;
         if (r.removeListener === void 0)
@@ -263,7 +262,7 @@
           for (i = n.length - 1; i >= 0; i--) this.removeListener(e, n[i]);
         return this;
       });
-    function le(t: { _events: any; }, e: string | number, n: boolean) {
+    function le(t, e, n) {
       var r = t._events;
       if (r === void 0) return [];
       var i = r[e];
@@ -277,19 +276,19 @@
         ? Pe(i)
         : de(i, i.length);
     }
-    (a.prototype.listeners = function (e: any) {
+    (a.prototype.listeners = function (e) {
       return le(this, e, !0);
     }),
-      (a.prototype.rawListeners = function (e: any) {
+      (a.prototype.rawListeners = function (e) {
         return le(this, e, !1);
       }),
-      (a.listenerCount = function (t: { listenerCount: (arg0: any) => any; }, e: any) {
+      (a.listenerCount = function (t, e) {
         return typeof t.listenerCount == "function"
           ? t.listenerCount(e)
           : he.call(t, e);
       }),
       (a.prototype.listenerCount = he);
-    function he(this: any, t: string | number) {
+    function he(t) {
       var e = this._events;
       if (e !== void 0) {
         var n = e[t];
@@ -301,22 +300,22 @@
     a.prototype.eventNames = function () {
       return this._eventsCount > 0 ? F(this._events) : [];
     };
-    function de(t: any[], e: number) {
+    function de(t, e) {
       for (var n = new Array(e), r = 0; r < e; ++r) n[r] = t[r];
       return n;
     }
-    function Re(t: void[], e: number) {
+    function Re(t, e) {
       for (; e + 1 < t.length; e++) t[e] = t[e + 1];
       t.pop();
     }
-    function Pe(t: string | any[]) {
+    function Pe(t) {
       for (var e = new Array(t.length), n = 0; n < e.length; ++n)
         e[n] = t[n].listener || t[n];
       return e;
     }
-    function $e(t: { removeListener: (arg0: string, arg1: { (): void; (s: any): void; }) => any; }, e: string) {
+    function $e(t, e) {
       return new Promise(function (n, r) {
-        function i(s: any) {
+        function i(s) {
           t.removeListener(e, o), r(s);
         }
         function o() {
@@ -326,13 +325,13 @@
         pe(t, e, o, { once: !0 }), e !== "error" && Te(t, i, { once: !0 });
       });
     }
-    function Te(t: { on: any; }, e: (s: any) => void, n: { once: boolean; }) {
+    function Te(t, e, n) {
       typeof t.on == "function" && pe(t, "error", e, n);
     }
-    function pe(t: { on: (arg0: any, arg1: any) => any; once: (arg0: any, arg1: any) => any; addEventListener: (arg0: any, arg1: (o: any) => void) => void; removeEventListener: (arg0: any, arg1: (o: any) => void) => any; }, e: string, n: { (): void; (arg0: any): any; }, r: { once: any; }) {
+    function pe(t, e, n, r) {
       if (typeof t.on == "function") r.once ? t.once(e, n) : t.on(e, n);
       else if (typeof t.addEventListener == "function")
-        t.addEventListener(e, function i(o: any) {
+        t.addEventListener(e, function i(o) {
           r.once && t.removeEventListener(e, i), n(o);
         });
       else
@@ -345,7 +344,7 @@
     const $ = "pc-designer-iframe-wrapper",
       j = "pc-designer-iframe";
     class Ae {
-      constructor(e: { token: any; productId: any; options: any; }) {
+      constructor(e) {
         w(this, z),
           w(this, G),
           w(this, U),
@@ -400,7 +399,7 @@
           (e.style.visibility = "hidden"),
           l(this, d, m).call(this, "closed");
       }
-      editDesign(e: any) {
+      editDesign(e) {
         const n = l(this, U, V).call(this);
         n.searchParams.set("design_id", e), n.searchParams.set("task", "edit");
         const r = document.getElementById($),
@@ -414,7 +413,7 @@
           (r.style.visibility = "visible"),
           l(this, d, m).call(this, "edit");
       }
-      on(e: any, n: any) {
+      on(e, n) {
         return R(this, P).on(e, n), this;
       }
     }
@@ -434,7 +433,7 @@
           document.body.appendChild(t);
       }),
       (G = new WeakSet()),
-      (ie =  () => {
+      (ie = function () {
         window.addEventListener(
           "message",
           (t) => {
@@ -477,57 +476,57 @@
         );
       }),
       (d = new WeakSet()),
-      (m = function (t: any, ...e: any) {
+      (m = function (t, ...e) {
         R(this, P).emit(t, ...e);
       });
-    var q = (t: any, e: { has: (arg0: any) => any; }, n: string) => {
+    var q = (t, e, n) => {
         if (!e.has(t)) throw TypeError("Cannot " + n);
       },
-      u = (t: this, e: { get: (arg0: any) => any; }, n: { call: (arg0: any) => any; } | undefined) => (
+      u = (t, e, n) => (
         q(t, e, "read from private field"), n ? n.call(t) : e.get(t)
       ),
-      y = (t: WeakKey, e: { has: (arg0: any) => any; add: (arg0: any) => any; set: (arg0: any, arg1: any) => any; }, n: undefined) => {
+      y = (t, e, n) => {
         if (e.has(t))
           throw TypeError("Cannot add the same private member more than once");
         e instanceof WeakSet ? e.add(t) : e.set(t, n);
       },
-      I = (t: this, e: { set: (arg0: any, arg1: any) => any; }, n: string, r: { call: (arg0: any, arg1: any) => any; } | undefined) => (
+      I = (t, e, n, r) => (
         q(t, e, "write to private field"), r ? r.call(t, n) : e.set(t, n), n
       ),
-      _ = (t: this, e: any, n: any) => (q(t, e, "access private method"), n),
-      T: WeakMap<WeakKey, any>,
-      O: WeakMap<WeakKey, any>,
-      C: WeakMap<WeakKey, any>,
-      W: WeakMap<WeakKey, any>,
-      A: WeakMap<WeakKey, any>,
-      k: WeakMap<WeakKey, any>,
-      g: WeakSet<WeakKey>,
-      x: (t: any, ...e: any[]) => void,
-      J: WeakSet<WeakKey>,
-      ve: () => void,
-      Q: WeakSet<WeakKey>,
-      me: () => void,
+      _ = (t, e, n) => (q(t, e, "access private method"), n),
+      T,
+      O,
+      C,
+      W,
+      A,
+      k,
+      g,
+      x,
+      J,
+      ve,
+      Q,
+      me,
       X = { exports: {} },
       M = typeof Reflect == "object" ? Reflect : null,
       ye =
         M && typeof M.apply == "function"
           ? M.apply
-          : function (e: Function, n: any, r: any) {
+          : function (e, n, r) {
               return Function.prototype.apply.call(e, n, r);
             },
-      B: ((target: object) => (string | symbol)[]) | ((arg0: any) => any);
+      B;
     M && typeof M.ownKeys == "function"
       ? (B = M.ownKeys)
       : Object.getOwnPropertySymbols
-      ? (B = function (e: any) {
+      ? (B = function (e) {
           return Object.getOwnPropertyNames(e).concat(
             Object.getOwnPropertySymbols(e)
           );
         })
-      : (B = function (e: any) {
+      : (B = function (e) {
           return Object.getOwnPropertyNames(e);
         });
-    function ke(t: Error) {
+    function ke(t) {
       console && console.warn && console.warn(t);
     }
     var Le =
@@ -535,7 +534,7 @@
       function (e) {
         return e !== e;
       };
-    function f(this: any) {
+    function f() {
       f.init.call(this);
     }
     (X.exports = f),
@@ -545,7 +544,7 @@
       (f.prototype._eventsCount = 0),
       (f.prototype._maxListeners = void 0);
     var _e = 10;
-    function D(t: any) {
+    function D(t) {
       if (typeof t != "function")
         throw new TypeError(
           'The "listener" argument must be of type Function. Received type ' +
@@ -573,7 +572,7 @@
           ((this._events = Object.create(null)), (this._eventsCount = 0)),
           (this._maxListeners = this._maxListeners || void 0);
       }),
-      (f.prototype.setMaxListeners = function (e: unknown) {
+      (f.prototype.setMaxListeners = function (e) {
         if (typeof e != "number" || e < 0 || Le(e))
           throw new RangeError(
             'The value of "n" is out of range. It must be a non-negative number. Received ' +
@@ -582,13 +581,13 @@
           );
         return (this._maxListeners = e), this;
       });
-    function ge(t: { _maxListeners: undefined; }) {
+    function ge(t) {
       return t._maxListeners === void 0 ? f.defaultMaxListeners : t._maxListeners;
     }
     (f.prototype.getMaxListeners = function () {
       return ge(this);
     }),
-      (f.prototype.emit = function (e: string) {
+      (f.prototype.emit = function (e) {
         for (var n = [], r = 1; r < arguments.length; r++) n.push(arguments[r]);
         var i = e === "error",
           o = this._events;
@@ -610,7 +609,7 @@
             ye(ee[r], this, n);
         return !0;
       });
-    function we(t: { _events: any; _eventsCount: number; emit: (arg0: string, arg1: any, arg2: any) => any; }, e: string | number, n: { listener: any; }, r: boolean) {
+    function we(t, e, n, r) {
       var i, o, s;
       if (
         (D(n),
@@ -649,14 +648,14 @@
       }
       return t;
     }
-    (f.prototype.addListener = function (e: any, n: any) {
+    (f.prototype.addListener = function (e, n) {
       return we(this, e, n, !1);
     }),
       (f.prototype.on = f.prototype.addListener),
-      (f.prototype.prependListener = function (e: any, n: any) {
+      (f.prototype.prependListener = function (e, n) {
         return we(this, e, n, !0);
       });
-    function Ne(this: any) {
+    function Ne() {
       if (!this.fired)
         return (
           this.target.removeListener(this.type, this.wrapFn),
@@ -666,18 +665,18 @@
             : this.listener.apply(this.target, arguments)
         );
     }
-    function Ee(t: any, e: any, n: any) {
+    function Ee(t, e, n) {
       var r = { fired: !1, wrapFn: void 0, target: t, type: e, listener: n },
         i = Ne.bind(r);
       return (i.listener = n), (r.wrapFn = i), i;
     }
-    (f.prototype.once = function (e: any, n: any) {
+    (f.prototype.once = function (e, n) {
       return D(n), this.on(e, Ee(this, e, n)), this;
     }),
-      (f.prototype.prependOnceListener = function (e: any, n: any) {
+      (f.prototype.prependOnceListener = function (e, n) {
         return D(n), this.prependListener(e, Ee(this, e, n)), this;
       }),
-      (f.prototype.removeListener = function (e: string | number, n: any) {
+      (f.prototype.removeListener = function (e, n) {
         var r, i, o, s, c;
         if ((D(n), (i = this._events), i === void 0)) return this;
         if (((r = i[e]), r === void 0)) return this;
@@ -701,7 +700,7 @@
         return this;
       }),
       (f.prototype.off = f.prototype.removeListener),
-      (f.prototype.removeAllListeners = function (e: string | number) {
+      (f.prototype.removeAllListeners = function (e) {
         var n, r, i;
         if (((r = this._events), r === void 0)) return this;
         if (r.removeListener === void 0)
@@ -731,7 +730,7 @@
           for (i = n.length - 1; i >= 0; i--) this.removeListener(e, n[i]);
         return this;
       });
-    function be(t: { _events: any; }, e: string | number, n: boolean) {
+    function be(t, e, n) {
       var r = t._events;
       if (r === void 0) return [];
       var i = r[e];
@@ -745,19 +744,19 @@
         ? Fe(i)
         : Oe(i, i.length);
     }
-    (f.prototype.listeners = function (e: any) {
+    (f.prototype.listeners = function (e) {
       return be(this, e, !0);
     }),
-      (f.prototype.rawListeners = function (e: any) {
+      (f.prototype.rawListeners = function (e) {
         return be(this, e, !1);
       }),
-      (f.listenerCount = function (t: { listenerCount: (arg0: any) => any; }, e: any) {
+      (f.listenerCount = function (t, e) {
         return typeof t.listenerCount == "function"
           ? t.listenerCount(e)
           : Ie.call(t, e);
       }),
       (f.prototype.listenerCount = Ie);
-    function Ie(this: any, t: string | number) {
+    function Ie(t) {
       var e = this._events;
       if (e !== void 0) {
         var n = e[t];
@@ -769,22 +768,22 @@
     f.prototype.eventNames = function () {
       return this._eventsCount > 0 ? B(this._events) : [];
     };
-    function Oe(t: any[], e: number) {
+    function Oe(t, e) {
       for (var n = new Array(e), r = 0; r < e; ++r) n[r] = t[r];
       return n;
     }
-    function Ue(t: void[], e: number) {
+    function Ue(t, e) {
       for (; e + 1 < t.length; e++) t[e] = t[e + 1];
       t.pop();
     }
-    function Fe(t: string | any[]) {
+    function Fe(t) {
       for (var e = new Array(t.length), n = 0; n < e.length; ++n)
         e[n] = t[n].listener || t[n];
       return e;
     }
-    function Se(t: { removeListener: (arg0: string, arg1: { (): void; (s: any): void; }) => any; }, e: string) {
+    function Se(t, e) {
       return new Promise(function (n, r) {
-        function i(s: any) {
+        function i(s) {
           t.removeListener(e, o), r(s);
         }
         function o() {
@@ -794,13 +793,13 @@
         Ce(t, e, o, { once: !0 }), e !== "error" && je(t, i, { once: !0 });
       });
     }
-    function je(t: { on: any; }, e: (s: any) => void, n: { once: boolean; }) {
+    function je(t, e, n) {
       typeof t.on == "function" && Ce(t, "error", e, n);
     }
-    function Ce(t: { on: (arg0: any, arg1: any) => any; once: (arg0: any, arg1: any) => any; addEventListener: (arg0: any, arg1: (o: any) => void) => void; removeEventListener: (arg0: any, arg1: (o: any) => void) => any; }, e: string, n: { (): void; (arg0: any): any; }, r: { once: any; }) {
+    function Ce(t, e, n, r) {
       if (typeof t.on == "function") r.once ? t.once(e, n) : t.on(e, n);
       else if (typeof t.addEventListener == "function")
-        t.addEventListener(e, function i(o: any) {
+        t.addEventListener(e, function i(o) {
           r.once && t.removeEventListener(e, i), n(o);
         });
       else
@@ -813,7 +812,7 @@
     const K = "pc-uploader-iframe-wrapper",
       Y = "pc-uploader-iframe";
     class De {
-      constructor(e: { token: any; sideId: any; productId: any; uploaderUrl: any; locale: any; }) {
+      constructor(e) {
         if (
           (y(this, g),
           y(this, J),
@@ -873,7 +872,7 @@
         }
         (e.style.opacity = "0"), (e.style.visibility = "hidden");
       }
-      on(e: any, n: any) {
+      on(e, n) {
         return u(this, W).on(e, n), this;
       }
     }
@@ -884,7 +883,7 @@
       (A = new WeakMap()),
       (k = new WeakMap()),
       (g = new WeakSet()),
-      (x =  (t: any, ...e: any) => {
+      (x = function (t, ...e) {
         u(this, W).emit(t, ...e);
       }),
       (J = new WeakSet()),
@@ -939,8 +938,8 @@
       });
     class Ke {
       constructor() {
-        te(this, "initDesignTool", (e: any) => new Ae(e));
-        te(this, "initUploader", (e: any) => new De(e));
+        te(this, "initDesignTool", (e) => new Ae(e));
+        te(this, "initUploader", (e) => new De(e));
       }
     }
     return Ke;
@@ -1479,13 +1478,14 @@ class PrintcartDesignerWix {
 
   #getUnauthToken() {
     const isDev = import.meta.env.MODE === "development";
+
     const src = this.#getScriptSrc();
 
     const url = new URL(src);
 
     const params = new URLSearchParams(url.search);
 
-    const token = "0ba4d853d3f19432c52d74bb0d29d0e7d9eadb607b511528bf8384ae218839d4";
+    const token = "9ade6f41dc85a9d93f91efe30929963ac835854ccfd55b00ccb209dab3b30059";
 
     return token;
   }

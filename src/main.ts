@@ -316,7 +316,6 @@ class PrintcartDesignerWix {
 
   #handleUploadSuccess(data: [DataWrap]) {
     const ids = data.map((design) => design.data.id);
-    console.log("Id: ", ids);
 
     let input = <HTMLInputElement>(
       document.querySelector('input[name="properties[_pcDesignIds]"]')
@@ -365,7 +364,6 @@ class PrintcartDesignerWix {
           .filter((id) => id !== design.data.id);
 
         input.value = newIds.join();
-        console.log("data1: ", newIds);
 
         preview.remove();
       };
@@ -431,7 +429,6 @@ class PrintcartDesignerWix {
     }
 
     localStorage.setItem("pc-design-ids", JSON.stringify(ids));
-    console.log("id: ", JSON.stringify(ids));
 
     data.forEach((design) => {
       if (!design.design_image.url) return;

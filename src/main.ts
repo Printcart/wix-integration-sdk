@@ -549,10 +549,6 @@ class PrintcartDesignerWix {
     return src;
   }
 
-  // #getScriptSrc() {
-  //   return 'https://589f-27-72-31-253.ngrok-free.app/dist/main.js?shopT=0ba4d853d3f19432c52d74bb0d29d0e7d9eadb607b511528bf8384ae218839d4';
-  // }
-
   #addStyle() {
     const sdkUrl = "https://unpkg.com/@printcart/wix-integration/dist";
     const link = document.createElement("link");

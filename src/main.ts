@@ -62,6 +62,7 @@ class PrintcartDesignerWix {
   init() {
     const wd = window as any;
     const self = this;
+
     wd?.wixDevelopersAnalytics
       ? this.#registerListener("first")
       : wd.addEventListener("wixDevelopersAnalyticsReady", function () {
@@ -185,7 +186,8 @@ class PrintcartDesignerWix {
         }
       }
 
-      const handleClick = () => {
+      const handleClick = (e: any) => {
+        e.preventDefault();
         if (this.#designerInstance && !this.#uploaderInstance) {
           this.#designerInstance.render();
         }
@@ -357,7 +359,9 @@ class PrintcartDesignerWix {
       btn.innerHTML = this.options?.removeUploaderBtnText
         ? this.options.removeUploaderBtnText
         : "Remove";
-      btn.onclick = () => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+
         const newIds = input.value
           .split(",")
           .filter((id) => id !== design.data.id);
@@ -440,7 +444,9 @@ class PrintcartDesignerWix {
       editBtn.className = "pc-btn pc-primary-btn";
       editBtn.style.borderRadius = "5px";
       editBtn.innerHTML = "Edit";
-      editBtn.onclick = () => {
+      editBtn.onclick = (e) => {
+        e.preventDefault();
+
         self.#designerInstance.editDesign(design.id);
       };
 
@@ -448,7 +454,9 @@ class PrintcartDesignerWix {
       removeBtn.className = "pc-btn pc-danger-btn";
       removeBtn.style.borderRadius = "5px";
       removeBtn.innerHTML = "Remove";
-      removeBtn.onclick = () => {
+      removeBtn.onclick = (e) => {
+        e.preventDefault();
+
         const newIds = input.value.split(",").filter((id) => id !== design.id);
 
         input.value = newIds.join();

@@ -9,6 +9,7 @@
   <body>
     <div id="app">
       <form action="/cart/add"></form>
+      <div type="hidden" name="product" data-hook="product-options"></div>
     </div>
     <script>
       window.PrintcartDesignerShopifyOptions = {
@@ -17,13 +18,10 @@
         },
         designerOptions: {
           showRuler: true,
-          designerUrl: 'http://localhost:3002',
+          designerUrl: "http://localhost:3002",
         },
       };
     </script>
-    <script
-      type="module"
-      src="./src/main.ts?shopT=dbbf93ce202e191178acee47c4046bb6fb8c8634f27c3f5e9ce19a38695483b2"
-    ></script>
+    <script type="module" src="./src/main.ts?shopT=dbbf93ce202e191178acee47c4046bb6fb8c8634f27c3f5e9ce19a38695483b2"></script>
   </body>
 </html>

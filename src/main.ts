@@ -616,7 +616,6 @@ class PrintcartDesignerWix {
   }
 
   #getUnauthToken() {
-    return "1ed23e41e296c45b0c6c9cd722398b90a3cc906301bdebfaac4751cf2df8d06d";
     const src = this.#getScriptSrc();
 
     const url = new URL(src);

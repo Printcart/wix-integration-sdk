@@ -42,6 +42,7 @@ class PrintcartDesignerWix {
   #uploaderInstance: any;
   #productForm: HTMLFormElement | null;
   registerListener: any;
+  textReplace: any;
 
   constructor() {
     this.token = this.#getUnauthToken();
@@ -50,6 +51,17 @@ class PrintcartDesignerWix {
     this.orderIdWix = null;
     this.orderNumberWix = null;
     this.#productForm = null;
+    this.textReplace = {
+      start_design: "Start Design",
+      pc_select_header: "Choose a way to design this product",
+      upload_a_full_design: "Upload a full design",
+      upload_design_file: "Upload Design file",
+      have_a_complete_design: "Have a complete design",
+      have_your_own_design: "Have your own designer",
+      design_here_online: "Design here online",
+      already_have_a_design: "Already have your concept",
+      customize_every_details: "Customize every details",
+    };
 
     // @ts-ignore
     this.options = window.PrintcartDesignerShopifyOptions;
@@ -68,6 +80,75 @@ class PrintcartDesignerWix {
       : wd.addEventListener("wixDevelopersAnalyticsReady", function () {
           self.#registerListener("second");
         });
+  }
+
+  async #getStoreDetail() {
+    try {
+      const printcartApiUrl = `${this.#apiUrl}/stores/store-details`;
+
+      const token = this.token;
+      if (!token) {
+        throw new Error("Missing Printcart Unauth Token");
+      }
+
+      const printcartPromise = await fetch(printcartApiUrl, {
+        headers: {
+          "X-PrintCart-Unauth-Token": token,
+        },
+      });
+
+      const storeDetail: any = await printcartPromise.json();
+
+      const cssString = storeDetail?.data?.setting_defaults?.customCss.value;
+      const textReplace = storeDetail?.data?.setting_defaults?.textReplace;
+
+      this.textReplace = {
+        start_design: textReplace?.start_design
+          ? textReplace.start_design
+          : "Start Design",
+        pc_select_header: textReplace?.pc_select_header
+          ? textReplace.pc_select_header
+          : "Choose a way to design this product",
+        upload_a_full_design: textReplace?.upload_a_full_design
+          ? textReplace.upload_a_full_design
+          : "Upload a full design",
+        upload_design_file: textReplace?.upload_design_file
+          ? textReplace.upload_design_file
+          : "Upload Design file",
+        have_a_complete_design: textReplace?.have_a_complete_design
+          ? textReplace.have_a_complete_design
+          : "Have a complete design",
+        have_your_own_design: textReplace?.have_your_own_design
+          ? textReplace.have_your_own_design
+          : "Have your own designer",
+        design_here_online: textReplace?.design_here_online
+          ? textReplace.design_here_online
+          : "Design here online",
+        already_have_a_design: textReplace?.already_have_a_design
+          ? textReplace.already_have_a_design
+          : "Already have your concept",
+        customize_every_details: textReplace?.customize_every_details
+          ? textReplace.customize_every_details
+          : "Customize every details",
+      };
+
+      if (cssString) {
+        const styleElement = document.createElement("style");
+
+        styleElement.textContent = cssString;
+        styleElement.type = "text/css";
+
+        document.head.appendChild(styleElement);
+      }
+
+      return storeDetail;
+    } catch (error) {
+      //@ts-ignore
+      console.error(
+        "There has been a problem with your fetch operation:",
+        error
+      );
+    }
   }
 
   #registerListener(par: string) {
@@ -127,6 +208,8 @@ class PrintcartDesignerWix {
 
   #initializeProductTools(productIdWix: string | null) {
     this.#productForm = document.querySelector("[data-hook='product-options']");
+
+    this.#getStoreDetail();
 
     if (!this.#productForm) {
       throw new Error(
@@ -211,7 +294,7 @@ class PrintcartDesignerWix {
     const uploadImgSrc = "https://files.printcart.com/common/upload.svg";
     const designImgSrc = "https://files.printcart.com/common/design.svg";
 
-    const inner = `<button aria-label="Close" id="pc-select_close-btn"><span data-modal-x></span></button><div class="pc-select-wrap" id="pc-content-overlay"><div class="pc-select-inner"><div id="pc-select_header">Choose a way to design this product</div><div id="pc-select_container"><button class="pc-select_btn" id="pc-select_btn_upload"><div aria-hidden="true" class="pc-select_btn_wrap"><div class="pc-select_btn_img"><div class="pc-select_btn_img_inner"><img src="${uploadImgSrc}" alt="Printcart Uploader"></div></div><div class="pc-select_btn_content"><div class="pc-select_btn_content_inner"><h2 class="pc-title">Upload a full design</h2><ul><li>Have a complete design</li><li>Have your own designer</li></ul></div></div></div><div class="visually-hidden">Upload Design file</div></button><button class="pc-select_btn" id="pc-select_btn_design"><div aria-hidden="true" class="pc-select_btn_wrap"><div class="pc-select_btn_img"><div class="pc-select_btn_img_inner"><img src="${designImgSrc}" alt="Printcart Designer"></div></div><div class="pc-select_btn_content"><div class="pc-select_btn_content_inner"><h2 class="pc-title">Design here online</h2><ul><li>Already have your concept</li><li>Customize every details</li></ul></div></div></div><div class="visually-hidden">Upload Design file</div></button></div></div></div>`;
+    const inner = `<button aria-label="Close" id="pc-select_close-btn"><span data-modal-x></span></button><div class="pc-select-wrap" id="pc-content-overlay"><div class="pc-select-inner"><div id="pc-select_header">${this.textReplace.pc_select_header}</div><div id="pc-select_container"><button class="pc-select_btn" id="pc-select_btn_upload"><div aria-hidden="true" class="pc-select_btn_wrap"><div class="pc-select_btn_img"><div class="pc-select_btn_img_inner"><img src="${uploadImgSrc}" alt="Printcart Uploader"></div></div><div class="pc-select_btn_content"><div class="pc-select_btn_content_inner"><h2 class="pc-title">${this.textReplace.upload_a_full_design}</h2><ul><li>${this.textReplace.have_a_complete_design}</li><li>${this.textReplace.have_your_own_design}</li></ul></div></div></div><div class="visually-hidden">${this.textReplace.upload_design_file}</div></button><button class="pc-select_btn" id="pc-select_btn_design"><div aria-hidden="true" class="pc-select_btn_wrap"><div class="pc-select_btn_img"><div class="pc-select_btn_img_inner"><img src="${designImgSrc}" alt="Printcart Designer"></div></div><div class="pc-select_btn_content"><div class="pc-select_btn_content_inner"><h2 class="pc-title">${this.textReplace.design_here_online}</h2><ul><li>${this.textReplace.already_have_a_design}</li><li>${this.textReplace.customize_every_details}</li></ul></div></div></div><div class="visually-hidden">${this.textReplace.upload_design_file}</div></button></div></div></div>`;
 
     const wrap = document.createElement("div");
     wrap.id = "pc-select_wrap";
@@ -533,6 +616,7 @@ class PrintcartDesignerWix {
   }
 
   #getUnauthToken() {
+    return "1ed23e41e296c45b0c6c9cd722398b90a3cc906301bdebfaac4751cf2df8d06d";
     const src = this.#getScriptSrc();
 
     const url = new URL(src);
@@ -615,9 +699,10 @@ class PrintcartDesignerWix {
     button.className = this.options?.designClassName
       ? this.options?.designClassName
       : "";
+
     button.innerHTML = this.options?.designBtnText
       ? this.options.designBtnText
-      : "Start Design";
+      : this.textReplace.start_design;
     button.disabled = true;
 
     wrap.appendChild(button);

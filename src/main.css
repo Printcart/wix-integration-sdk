@@ -270,21 +270,22 @@
 }
 
 #pc-btn {
-  border: none;
-  margin: 0;
-  padding: 0;
+  border: 1px solid var(--pc-primary-color);
   width: auto;
   overflow: visible;
   color: var(--pc-white-color);
-  background-color: var(--pc-drank-color);
-  line-height: normal;
+  background-color: var(--pc-primary-color);
+  line-height: 1.5;
   -webkit-font-smoothing: inherit;
   -moz-osx-font-smoothing: inherit;
   -webkit-appearance: none;
-  padding: 8px 12px;
+  padding: 10px 20px;
   cursor: pointer;
-  margin-bottom: 8px;
+  margin: 10px 0;
   min-width: 74px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 50px;
 }
 
 #pc-btn:hover {

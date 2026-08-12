@@ -1,6 +1,170 @@
 import PrintcartDesigner from "./printcartDesigner";
 import "./main.css";
 
+declare global {
+  interface Window {
+    __printcartWixLegacyHotfixInstalled?: boolean;
+  }
+}
+
+function installStorefrontHotfixes() {
+  if (window.__printcartWixLegacyHotfixInstalled) return;
+  window.__printcartWixLegacyHotfixInstalled = true;
+
+  let printcartProductIdPromise: Promise<string | null> | null = null;
+
+  const getUnauthToken = () => {
+    const script = document.querySelector(
+      "script#pc-wix-integration-sdk"
+    ) as HTMLScriptElement | null;
+    if (!script?.src) return null;
+
+    return new URL(script.src).searchParams.get("shopT");
+  };
+
+  const getPrintcartProductId = async () => {
+    if (printcartProductIdPromise) return printcartProductIdPromise;
+
+    printcartProductIdPromise = (async () => {
+      const token = getUnauthToken();
+      const productEl = document.querySelector("printcart-pod[product-id]");
+      const wixProductId = productEl?.getAttribute("product-id");
+      if (!token || !wixProductId) return null;
+
+      const response = await fetch(
+        `https://api.printcart.com/v1/integration/wix/products/${wixProductId}`,
+        { headers: { "X-PrintCart-Unauth-Token": token } }
+      );
+      if (!response.ok) return null;
+
+      const product = await response.json();
+      return product?.data?.id ?? null;
+    })();
+
+    return printcartProductIdPromise;
+  };
+
+  const ensureToolFrame = (wrapperId: string, iframeId: string) => {
+    let wrapper = document.getElementById(wrapperId) as HTMLDivElement | null;
+    let iframe = document.getElementById(iframeId) as HTMLIFrameElement | null;
+
+    if (!wrapper || !iframe) {
+      wrapper = document.createElement("div");
+      wrapper.id = wrapperId;
+      iframe = document.createElement("iframe");
+      iframe.id = iframeId;
+      iframe.width = "100%";
+      iframe.height = "100%";
+      iframe.style.borderWidth = "0";
+      wrapper.appendChild(iframe);
+      document.body.appendChild(wrapper);
+    }
+
+    wrapper.style.cssText =
+      "position:fixed;top:0;left:0;width:100vw;height:100vh;opacity:1;visibility:visible;z-index:1000000;background:#fff;";
+    iframe.style.visibility = "visible";
+    return iframe;
+  };
+
+  const openDesigner = async () => {
+    const token = getUnauthToken();
+    const productId = await getPrintcartProductId();
+    if (!token || !productId) return;
+
+    const url = new URL("https://customizer.printcart.com");
+    url.searchParams.set("api_key", token);
+    url.searchParams.set("product_id", productId);
+    url.searchParams.set("parentUrl", window.location.href);
+    ensureToolFrame("pc-designer-iframe-wrapper", "pc-designer-iframe").src =
+      url.href;
+  };
+
+  const openUploader = async () => {
+    const token = getUnauthToken();
+    const productId = await getPrintcartProductId();
+    if (!token || !productId) return;
+
+    const url = new URL("https://upload-tool.pages.dev");
+    url.searchParams.set("token", token);
+    url.searchParams.set("productId", productId);
+    url.searchParams.set("parentUrl", window.location.href);
+    ensureToolFrame("pc-uploader-iframe-wrapper", "pc-uploader-iframe").src =
+      url.href;
+  };
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      const target = event.target as Element | null;
+      const button = target?.closest("button");
+      const text = button?.textContent ?? "";
+      const isDesigner = /Customize Online/i.test(text);
+      const isUploader = /Upload Artwork/i.test(text);
+      if (!isDesigner && !isUploader) return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      void (isDesigner ? openDesigner() : openUploader());
+    },
+    true
+  );
+
+  const nativeFetch = window.fetch.bind(window);
+  window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+        ? input.href
+        : input.url;
+
+    try {
+      const response = await nativeFetch(input, init);
+      if (!response.ok && url.includes("/functions/usage/track")) {
+        console.warn("Printcart: usage tracking failed; continuing buyer flow.");
+        return new Response(JSON.stringify({ ok: true, skipped: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      return response;
+    } catch (error) {
+      if (url.includes("/functions/usage/track")) {
+        console.warn("Printcart: usage tracking unavailable; continuing buyer flow.", error);
+        return new Response(JSON.stringify({ ok: true, skipped: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      throw error;
+    }
+  };
+
+  const style = document.createElement("style");
+  style.id = "pc-wix-storefront-hotfixes";
+  style.textContent = `
+    [class*="_pcDrModalBody_"] {
+      background: #ffffff !important;
+      border: 1px solid #dfe5f2 !important;
+      border-radius: 8px !important;
+      box-shadow: 0 16px 44px rgba(18, 31, 67, 0.18) !important;
+      padding: 24px !important;
+      max-width: 560px !important;
+      width: min(560px, calc(100vw - 32px)) !important;
+      margin: auto !important;
+    }
+
+    [class*="_pcDrModalBody_"] form {
+      background: #ffffff !important;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+installStorefrontHotfixes();
+
 const printcartDesigner = new PrintcartDesigner();
 
 interface IOptions {

@@ -259,6 +259,7 @@ function installStorefrontHotfixes() {
       align-items: stretch !important;
       background: transparent !important;
       border: 0 !important;
+      box-sizing: border-box !important;
       box-shadow: none !important;
       color: inherit !important;
       cursor: wait !important;
@@ -270,7 +271,7 @@ function installStorefrontHotfixes() {
       padding: 0 !important;
       pointer-events: none !important;
       text-align: left !important;
-      width: 100% !important;
+      width: min(355px, calc(100vw - 32px)) !important;
     }
 
     .pc-wix-loading-action {

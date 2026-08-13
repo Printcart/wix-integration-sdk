@@ -287,6 +287,14 @@ function installStorefrontHotfixes() {
       width: 100% !important;
     }
 
+    button.pc-wix-loading-actions > span.pc-wix-loading-action {
+      align-self: stretch !important;
+      justify-self: stretch !important;
+      max-width: none !important;
+      min-width: min(355px, calc(100vw - 32px)) !important;
+      width: min(355px, calc(100vw - 32px)) !important;
+    }
+
     .pc-wix-loading-action::after {
       animation: pc-wix-loading-sweep 1.25s ease-in-out infinite !important;
       background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.18), transparent) !important;

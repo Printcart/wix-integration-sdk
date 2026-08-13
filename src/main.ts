@@ -12,6 +12,7 @@ function installStorefrontHotfixes() {
   window.__printcartWixLegacyHotfixInstalled = true;
 
   let printcartProductIdPromise: Promise<string | null> | null = null;
+  let lastHandledAt = 0;
 
   const getUnauthToken = () => {
     const script = document.querySelector(
@@ -92,22 +93,68 @@ function installStorefrontHotfixes() {
       url.href;
   };
 
-  document.addEventListener(
-    "click",
-    (event) => {
-      const target = event.target as Element | null;
-      const button = target?.closest("button");
-      const text = button?.textContent ?? "";
-      const isDesigner = /Customize Online/i.test(text);
-      const isUploader = /Upload Artwork/i.test(text);
-      if (!isDesigner && !isUploader) return;
+  const findPrintcartAction = (event: Event): "designer" | "uploader" | null => {
+    const path =
+      typeof event.composedPath === "function" ? event.composedPath() : [];
+    const candidates = [
+      ...path,
+      event.target,
+    ].filter((node): node is Element => node instanceof Element);
 
+    for (const node of candidates) {
+      const button =
+        node instanceof HTMLButtonElement ? node : node.closest?.("button");
+      if (!button) continue;
+
+      const text = button.textContent ?? "";
+      if (/Customize Online/i.test(text)) return "designer";
+      if (/Upload Artwork/i.test(text)) return "uploader";
+    }
+
+    return null;
+  };
+
+  const handleBuyerAction = (event: Event) => {
+    const action = findPrintcartAction(event);
+    if (!action) return;
+
+    const now = Date.now();
+    if (now - lastHandledAt < 1200) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      void (isDesigner ? openDesigner() : openUploader());
-    },
-    true
-  );
+      return;
+    }
+    lastHandledAt = now;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    void (action === "designer" ? openDesigner() : openUploader());
+  };
+
+  ["pointerdown", "mousedown", "touchstart", "click"].forEach((eventName) => {
+    document.addEventListener(eventName, handleBuyerAction, true);
+  });
+
+  const bindVisibleButtons = () => {
+    document.querySelectorAll("button").forEach((button) => {
+      const text = button.textContent ?? "";
+      if (!/Customize Online|Upload Artwork/i.test(text)) return;
+      if (button.getAttribute("data-pc-hotfix-bound") === "1") return;
+
+      button.setAttribute("data-pc-hotfix-bound", "1");
+      button.addEventListener("click", handleBuyerAction, true);
+      button.addEventListener("pointerdown", handleBuyerAction, true);
+    });
+  };
+
+  bindVisibleButtons();
+  window.setTimeout(bindVisibleButtons, 500);
+  window.setTimeout(bindVisibleButtons, 1500);
+  window.setTimeout(bindVisibleButtons, 3000);
+  new MutationObserver(bindVisibleButtons).observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+  });
 
   const nativeFetch = window.fetch.bind(window);
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {

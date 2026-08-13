@@ -45,6 +45,45 @@ function installStorefrontHotfixes() {
     return printcartProductIdPromise;
   };
 
+  const loadingMarkup = `
+    <span class="pc-wix-loading-action pc-wix-loading-primary">
+      <span class="pc-wix-loading-icon"></span>
+      <span class="pc-wix-loading-copy">
+        <span class="pc-wix-loading-label">Customize Online</span>
+        <span class="pc-wix-loading-subtitle">Use the online designer</span>
+      </span>
+    </span>
+    <span class="pc-wix-loading-action pc-wix-loading-secondary">
+      <span class="pc-wix-loading-icon"></span>
+      <span class="pc-wix-loading-copy">
+        <span class="pc-wix-loading-label">Upload Artwork</span>
+        <span class="pc-wix-loading-subtitle">Send a print-ready file</span>
+      </span>
+    </span>
+    <span class="pc-wix-loading-action pc-wix-loading-outline">
+      <span class="pc-wix-loading-icon"></span>
+      <span class="pc-wix-loading-copy">
+        <span class="pc-wix-loading-label">Request a Quote</span>
+        <span class="pc-wix-loading-subtitle">Get a custom price</span>
+      </span>
+    </span>
+  `;
+
+  const enhanceLoadingButtons = () => {
+    if (!document.querySelector("printcart-pod[product-id]")) return;
+
+    document.querySelectorAll("button").forEach((button) => {
+      if (button.getAttribute("data-pc-loading-placeholder") === "1") return;
+      const text = (button.textContent ?? "").trim();
+      if (!/^Loading\.?\.?\.?$/i.test(text)) return;
+
+      button.setAttribute("data-pc-loading-placeholder", "1");
+      button.setAttribute("aria-label", "Loading Printcart design options");
+      button.classList.add("pc-wix-loading-actions");
+      button.innerHTML = loadingMarkup;
+    });
+  };
+
   const ensureToolFrame = (wrapperId: string, iframeId: string) => {
     let wrapper = document.getElementById(wrapperId) as HTMLDivElement | null;
     let iframe = document.getElementById(iframeId) as HTMLIFrameElement | null;
@@ -105,6 +144,7 @@ function installStorefrontHotfixes() {
       const button =
         node instanceof HTMLButtonElement ? node : node.closest?.("button");
       if (!button) continue;
+      if (button.getAttribute("data-pc-loading-placeholder") === "1") continue;
 
       const text = button.textContent ?? "";
       if (/Customize Online/i.test(text)) return "designer";
@@ -137,6 +177,7 @@ function installStorefrontHotfixes() {
 
   const bindVisibleButtons = () => {
     document.querySelectorAll("button").forEach((button) => {
+      if (button.getAttribute("data-pc-loading-placeholder") === "1") return;
       const text = button.textContent ?? "";
       if (!/Customize Online|Upload Artwork/i.test(text)) return;
       if (button.getAttribute("data-pc-hotfix-bound") === "1") return;
@@ -148,10 +189,17 @@ function installStorefrontHotfixes() {
   };
 
   bindVisibleButtons();
+  enhanceLoadingButtons();
   window.setTimeout(bindVisibleButtons, 500);
   window.setTimeout(bindVisibleButtons, 1500);
   window.setTimeout(bindVisibleButtons, 3000);
-  new MutationObserver(bindVisibleButtons).observe(document.documentElement, {
+  window.setTimeout(enhanceLoadingButtons, 500);
+  window.setTimeout(enhanceLoadingButtons, 1500);
+  window.setTimeout(enhanceLoadingButtons, 3000);
+  new MutationObserver(() => {
+    bindVisibleButtons();
+    enhanceLoadingButtons();
+  }).observe(document.documentElement, {
     childList: true,
     subtree: true,
   });
@@ -205,6 +253,119 @@ function installStorefrontHotfixes() {
 
     [class*="_pcDrModalBody_"] form {
       background: #ffffff !important;
+    }
+
+    .pc-wix-loading-actions {
+      align-items: stretch !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      color: inherit !important;
+      cursor: wait !important;
+      display: grid !important;
+      gap: 10px !important;
+      height: auto !important;
+      min-height: 0 !important;
+      min-width: 0 !important;
+      padding: 0 !important;
+      pointer-events: none !important;
+      text-align: left !important;
+      width: 100% !important;
+    }
+
+    .pc-wix-loading-action {
+      align-items: center !important;
+      border-radius: 8px !important;
+      box-sizing: border-box !important;
+      display: flex !important;
+      gap: 12px !important;
+      min-height: 54px !important;
+      overflow: hidden !important;
+      padding: 10px 14px !important;
+      position: relative !important;
+      width: 100% !important;
+    }
+
+    .pc-wix-loading-action::after {
+      animation: pc-wix-loading-sweep 1.25s ease-in-out infinite !important;
+      background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.18), transparent) !important;
+      content: "" !important;
+      inset: 0 !important;
+      position: absolute !important;
+      transform: translateX(-100%) !important;
+    }
+
+    .pc-wix-loading-primary {
+      background: #116dff !important;
+      border: 1px solid #116dff !important;
+      color: #ffffff !important;
+    }
+
+    .pc-wix-loading-secondary {
+      background: #111827 !important;
+      border: 1px solid #111827 !important;
+      color: #ffffff !important;
+    }
+
+    .pc-wix-loading-outline {
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #111827 !important;
+    }
+
+    .pc-wix-loading-outline::after {
+      background: linear-gradient(90deg, transparent, rgb(17 109 255 / 0.08), transparent) !important;
+    }
+
+    .pc-wix-loading-icon {
+      align-items: center !important;
+      background: rgb(255 255 255 / 0.16) !important;
+      border-radius: 8px !important;
+      display: flex !important;
+      flex: 0 0 34px !important;
+      height: 34px !important;
+      justify-content: center !important;
+      width: 34px !important;
+    }
+
+    .pc-wix-loading-outline .pc-wix-loading-icon {
+      background: #eff6ff !important;
+    }
+
+    .pc-wix-loading-icon::before {
+      background: currentColor !important;
+      border-radius: 4px !important;
+      content: "" !important;
+      display: block !important;
+      height: 16px !important;
+      opacity: 0.28 !important;
+      width: 16px !important;
+    }
+
+    .pc-wix-loading-copy {
+      display: grid !important;
+      gap: 2px !important;
+      min-width: 0 !important;
+    }
+
+    .pc-wix-loading-label {
+      display: block !important;
+      font-size: 14px !important;
+      font-weight: 800 !important;
+      line-height: 1.15 !important;
+    }
+
+    .pc-wix-loading-subtitle {
+      display: block !important;
+      font-size: 12px !important;
+      line-height: 1.25 !important;
+      opacity: 0.76 !important;
+    }
+
+    @keyframes pc-wix-loading-sweep {
+      to {
+        transform: translateX(100%);
+      }
     }
   `;
   document.head.appendChild(style);
